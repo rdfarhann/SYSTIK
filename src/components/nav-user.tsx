@@ -88,7 +88,7 @@ export function NavUser({
                     {user.name.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+                <div className="grid flex-1 text-left text-sm leading-tight text-foreground">
                   <span className="truncate font-semibold">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>
@@ -96,18 +96,18 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck className="mr-4 size-4 text-pr" />
+              <DropdownMenuItem className="text-foreground focus:text-background">
+                <BadgeCheck/>
                 Account Settings
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell className="mr-4 size-4 text-primary" />
+              <DropdownMenuItem className="text-foreground focus:text-background">
+                <Bell/>
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-900">
-              <LogOut className="mr-2 size-4" />
+            <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-background">
+              <LogOut />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

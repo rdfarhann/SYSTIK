@@ -45,12 +45,11 @@ export default async function DashboardPage() {
   return (
     <SidebarProvider>
       {/* ================= SIDEBAR ================= */}
-      <AppSidebar
-        userProfile={{
-          full_name: profile?.full_name,
-          email: user.email,
-        }}
-      />
+      <AppSidebar userProfile={{
+        full_name: profile?.full_name,
+        email: user.email,
+      }}></AppSidebar>
+      
 
       {/* ================= MAIN ================= */}
       <main className="flex min-h-screen flex-1 flex-col">
