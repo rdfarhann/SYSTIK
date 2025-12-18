@@ -1,8 +1,9 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { createBrowserClient } from "@supabase/ssr" 
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -19,11 +20,14 @@ import {
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter()
+  
+  // Inisialisasi Supabase Browser Client
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -36,26 +40,30 @@ export function LoginForm({
     setError("")
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       })
 
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || "Login gagal")
+      if (authError) {
+        setError("Email atau Password Salah")
         setLoading(false)
         return
       }
 
-      // ✅ LOGIN BERHASIL
-      router.push("/dashboard")
-      router.refresh()
+      if (data.user) {
+        // PENTING: Refresh router terlebih dahulu agar server-side 
+        // mengetahui adanya cookie session yang baru
+        router.refresh()
+        
+        // Gunakan push setelah refresh untuk mengarahkan ke dashboard
+        // Gunakan jeda micro-task agar state tersimpan sempurna
+        setTimeout(() => {
+          window.location.href = "/dashboard"
+        }, 500)
+      }
     } catch (err) {
-      setError("Server error")
-    } finally {
+      setError("An unexpected server error occurred")
       setLoading(false)
     }
   }
@@ -64,10 +72,10 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-4", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <div className="flex justify-center">
+          <div className="flex justify-center mb-2">
             <Image
               src="/systik.svg"
-              alt="systik logo"
+              alt="SYSTIK logo"
               width={250}
               height={250}
               priority
@@ -81,19 +89,22 @@ export function LoginForm({
 
         <CardContent>
           <form onSubmit={handleSubmit}>
-            <FieldGroup>
+            <FieldGroup className="flex flex-col gap-4">
               {error && (
-                <p className="text-sm text-red-500">{error}</p>
+                <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md border border-red-200 animate-in fade-in zoom-in duration-200">
+                  {error}
+                </div>
               )}
 
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
                   id="email"
-                  type="text"
+                  type="email"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
                   required
                 />
               </Field>
@@ -106,22 +117,21 @@ export function LoginForm({
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
                   required
                 />
               </Field>
 
-              <Field>
-                <Button type="submit" disabled={loading} className="w-full">
-                  {loading ? "Loading..." : "Login"}
-                </Button>
-              </Field>
+              <Button type="submit" disabled={loading} className="w-full mt-2">
+                {loading ? "Logging in..." : "Login"}
+              </Button>
             </FieldGroup>
 
-            <footer className="py-4 px-4 text-center text-sm text-black font-normal">
+            <footer className="mt-6 text-center text-xs text-muted-foreground font-normal">
               © {new Date().getFullYear()}{" "}
               <a
                 href="https://www.pupuk-kujang.co.id/"
-                className="underline font-semibold hover:text-primary"
+                className="underline font-semibold hover:text-primary transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
               >

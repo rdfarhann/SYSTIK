@@ -1,9 +1,12 @@
-import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import db from "@/lib/db"
-import type { RowDataPacket } from "mysql2"
+
+import {
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 
 import { AppSidebar } from "@/components/app-sidebar"
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,54 +15,51 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+
 import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { createSupabaseServer } from "@/lib/supabase/server"
 
-interface DashboardUser {
-  id: number
-  name: string
-  email: string
-  employee_id: string
-}
+export default async function DashboardPage() {
+  const supabase = await createSupabaseServer()
 
-export default async function Page() {
-  
-  const cookieStore = await cookies()
-  const isLogin = cookieStore.get("login")
-  const userId = cookieStore.get("user_id")?.value
+  /* ================= AUTH ================= */
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  
-  if (!isLogin || !userId) {
-    redirect("/login")
-  }
+  if (!user) redirect("/")
 
- 
-  const [rows] = await db.query<RowDataPacket[] & DashboardUser[]>(
-    "SELECT id, name, email, employee_id FROM users WHERE id = ? LIMIT 1",
-    [userId]
-  )
+  /* ================= PROFILE ================= */
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, employee_id")
+    .eq("id", user.id)
+    .single()
 
- 
-  if (rows.length === 0) {
-    redirect("/login")
-  }
+  const displayName =
+    profile?.full_name ?? user.email?.split("@")[0] ?? "User"
 
-  const user = rows[0]
+  const displayEmail = user.email ?? "-"
+  const displayId = profile?.employee_id ?? "No ID"
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      {/* ================= SIDEBAR ================= */}
+      <AppSidebar
+        userProfile={{
+          full_name: profile?.full_name,
+          email: user.email,
+        }}
+      />
 
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b">
-          <div className="flex items-center gap-2 px-3 w-full justify-between">
+      {/* ================= MAIN ================= */}
+      <main className="flex min-h-screen flex-1 flex-col">
+        {/* ---------- HEADER ---------- */}
+        <header className="flex h-16 items-center border-b px-4">
+          <div className="flex w-full items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
-              <Separator orientation="vertical" className="mr-2 h-4" />
+              <Separator orientation="vertical" className="h-4" />
 
               <Breadcrumb>
                 <BreadcrumbList>
@@ -76,28 +76,36 @@ export default async function Page() {
               </Breadcrumb>
             </div>
 
-            {/* 👤 USER INFO */}
             <div className="text-right">
-              <p className="text-sm font-medium">
-                {user.name}
+              <p className="text-sm font-semibold uppercase">
+                {displayName}
               </p>
-              <p className="text-xs text-muted-foreground">
-                {user.email} · {user.employee_id}
+              <p className="mt-1 text-[10px] leading-none text-muted-foreground">
+                {displayEmail}
+                <span className="mx-1">•</span>
+                {displayId}
               </p>
             </div>
           </div>
         </header>
 
-        {/* CONTENT */}
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
+        <section className="flex flex-1 flex-col gap-4 p-4">
+          {!profile?.full_name && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-xs text-blue-700">
+              Info: Profil Anda belum lengkap. Hubungi Admin untuk
+              memperbarui Nama dan ID Karyawan.
+            </div>
+          )}
+
+          {/* <div className="grid gap-4 md:grid-cols-3">
+            <div className="aspect-video rounded-xl border bg-muted/50" />
+            <div className="aspect-video rounded-xl border bg-muted/50" />
+            <div className="aspect-video rounded-xl border bg-muted/50" />
           </div>
-          <div className="bg-muted/50 min-h-screen flex-1 rounded-xl md:min-h-min" />
-        </div>
-      </SidebarInset>
+
+          <div className="flex-1 rounded-xl border border-dashed bg-muted/50" /> */}
+        </section>
+      </main>
     </SidebarProvider>
   )
 }

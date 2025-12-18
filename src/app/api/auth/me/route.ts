@@ -1,32 +1,30 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
-import db from "@/lib/db"
-import type { RowDataPacket } from "mysql2"
-
-interface User {
-  id: string
-  name: string
-  email: string
-  employee_id: string
-}
+import { createSupabaseServer } from "@/lib/supabase/server"
 
 export async function GET() {
-  const cookieStore = await cookies()
-  const userId = cookieStore.get("user_id")?.value
+  // ✅ Gunakan Supabase server client
+  const supabase = await createSupabaseServer()
 
-  if (!userId) {
+  // ✅ Ambil user dari session Supabase
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
     return NextResponse.json(
       { error: "Unauthorized" },
       { status: 401 }
     )
   }
 
-  const [rows] = await db.query<RowDataPacket[] & User[]>(
-    "SELECT id, name, email, employee_id FROM users WHERE id = ? LIMIT 1",
-    [userId]
-  )
+  // ✅ Ambil profile dari table "profiles"
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("id, full_name, employee_id, department, avatar_url")
+    .eq("id", user.id)
+    .single()
 
-  if (rows.length === 0) {
+  if (error || !profile) {
     return NextResponse.json(
       { error: "User not found" },
       { status: 404 }
@@ -34,6 +32,13 @@ export async function GET() {
   }
 
   return NextResponse.json({
-    user: rows[0],
+    user: {
+      id: user.id,
+      email: user.email,
+      full_name: profile.full_name,
+      employee_id: profile.employee_id,
+      department: profile.department,
+      avatar_url: profile.avatar_url,
+    },
   })
 }

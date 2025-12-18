@@ -4,141 +4,118 @@ import * as React from "react"
 import Image from "next/image"
 import {
   Sidebar,
-  SidebarContent,
-  SidebarGroup,
   SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  SidebarRail,
+  SidebarMenuButton,
 } from "@/components/ui/sidebar"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { NavUser } from "@/components/nav-user"
+import {
+  LayoutDashboard,
+  Ticket,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  ChevronRight,
+} from "lucide-react"
 
-
-
-interface SubMenuItem {
-  title: string;
-  url: string;
-  isActive?: boolean;
+interface AppSidebarProps {
+  userProfile?: {
+    full_name?: string | null
+    email?: string | null
+    employee_id?: string | null
+  } | null
 }
 
-interface MainMenuItem {
-  title: string;
-  url: string;
-  items?: SubMenuItem[];
-}
-
-interface SidebarData {
-  navMain: MainMenuItem[];
-}
-
-
-
-const data: SidebarData = {
-  navMain: [
-    {
-      title: "Ticket Dashboard",
-      url: "#",
-      items: [
-        {
-          title: "Assigned to Me",
-          url: "#",
-          isActive: false,
-        },
-        {
-          title: "Your Tikcet",
-          url: "#",
-          isActive: false,
-        },
-        {
-          title: "Open",
-          url: "#",
-          isActive: false,
-        },
-        {
-          title: "Closed",
-          url: "#",
-          isActive: false,
-        },
-        {
-          title: "Pending",
-          url: "#",
-          isActive: false,
-        },
-        {
-          title: "In Progress",
-          url: "#",
-          isActive: false,
-        },
-        {
-          title: "Waiting for Response",
-          url: "#",
-          isActive: false,
-        },
-        {
-          title: "Canceled",
-          url: "#",
-          isActive: false,
-        },
-      ],
-    },
-  ],
-}
-
-
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ userProfile }: AppSidebarProps) {
   return (
-    <Sidebar {...props}>
+    <Sidebar className="w-64">
+      {/* ===== HEADER ===== */}
       <SidebarHeader>
+        <div className="flex items-center gap-4">
+          <Image
+            src="/systik_round.png"
+            width={40}
+            height={40}
+            alt="Logo"
+          />
+          <div className="leading-tight">
+            <p className="font-bold text-lg">SYSTIK</p>
+            <p className="text-xs text-muted-foreground">
+              Solve Your Issue
+            </p>
+          </div>
+        </div>
+      </SidebarHeader>
+
+      {/* ===== CONTENT ===== */}
+      <SidebarContent className="px-2 py-3 space-y-2">
         <SidebarMenu>
+          {/* Dashboard */}
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                  <Image
-                  src ="/systik_round.png"
-                  width={50}
-                  height={50}
-                  alt="Logo Dashboard"
-                  />
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-bold">SYSTIK</span>
-                  <span className="">Solve Your Issue</span>
-                </div>
+            <SidebarMenuButton
+              asChild
+              className="h-12 gap-3 rounded-lg px-3"
+            >
+              <a href="/dashboard">
+                <LayoutDashboard className="h-5 w-5" />
+                <span className="font-medium">Dashboard</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarMenu>
-            {data.navMain.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
-                  <a href={item.url} className="font-semibold">
-                    {item.title}
+
+          {/* Accordion Status */}
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="status" className="border-none">
+              <AccordionTrigger className="h-12 rounded-lg px-3 hover:bg-background hover:text-foreground">
+                <div className="flex items-center gap-3">
+                  <Ticket className="h-5 w-5" />
+                  <span className="font-medium">Ticket Status</span>
+                </div>
+              </AccordionTrigger>
+
+              <AccordionContent className="pt-1 space-y-1">
+                {[
+                  { label: "Open", icon: AlertCircle, href: "/tickets/open" },
+                  { label: "In Progress", icon: Clock, href: "/tickets/progress" },
+                  { label: "Closed", icon: CheckCircle, href: "/tickets/closed" },
+                  { label: "Canceled", icon: XCircle, href: "/tickets/canceled" },
+                ].map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className="flex h-11 items-center gap-3 rounded-md px-9 text-sm text-background hover:bg-background hover:text-foreground"
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                    <ChevronRight className="ml-auto h-4 w-4 opacity-40" />
                   </a>
-                </SidebarMenuButton>
-                {item.items?.length ? (
-                  <SidebarMenuSub>
-                    {item.items.map((subItem) => (
-                      <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton asChild isActive={subItem.isActive}>
-                          <a href={subItem.url}>{subItem.title}</a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                ) : null}
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </SidebarMenu>
       </SidebarContent>
-      <SidebarRail />
+
+      {/* ===== FOOTER ===== */}
+      <SidebarFooter className="border-t p-2">
+        <NavUser
+          user={{
+            name: userProfile?.full_name ?? "Full Name",
+            email:
+              `${userProfile?.employee_id ?? "EMP"} · ${userProfile?.email ?? "email@company.com"}`,
+          }}
+        />
+      </SidebarFooter>
     </Sidebar>
   )
 }
