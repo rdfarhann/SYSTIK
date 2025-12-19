@@ -39,7 +39,6 @@ interface AppSidebarProps {
 export function AppSidebar({ userProfile }: AppSidebarProps) {
   return (
     <Sidebar className="w-64">
-      {/* ===== HEADER ===== */}
       <SidebarHeader>
         <div className="flex items-center gap-4">
           <Image
@@ -57,10 +56,8 @@ export function AppSidebar({ userProfile }: AppSidebarProps) {
         </div>
       </SidebarHeader>
 
-      {/* ===== CONTENT ===== */}
       <SidebarContent className="px-2 py-3 space-y-2">
         <SidebarMenu>
-          {/* Dashboard */}
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
@@ -73,7 +70,7 @@ export function AppSidebar({ userProfile }: AppSidebarProps) {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* Accordion Status */}
+  
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="status" className="border-none">
               <AccordionTrigger className="h-12 rounded-lg px-3 hover:bg-background hover:text-foreground">
@@ -106,8 +103,7 @@ export function AppSidebar({ userProfile }: AppSidebarProps) {
         </SidebarMenu>
       </SidebarContent>
 
-      {/* ===== FOOTER ===== */}
-      <SidebarFooter className="border-t p-2">
+      <SidebarFooter className="border-t p-1 ">
         <NavUser
           user={{
             name: userProfile?.full_name ?? "Full Name",
