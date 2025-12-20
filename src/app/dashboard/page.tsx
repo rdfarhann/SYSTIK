@@ -6,7 +6,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebar } from "@/components/layout/app-sidebar"
 
 /* ================= UI COMPONENTS ================= */
 import { Button } from "@/components/ui/button"
@@ -40,7 +40,7 @@ import {
 } from "lucide-react"
 
 /* ================= COMPONENTS ================= */
-import DashboardHero from "@/components/dashboard-hero"
+import DashboardHero from "@/components/layout/dashboard-hero"
 
 export default async function DashboardPage() {
   /* ================= AUTH ================= */
@@ -94,32 +94,32 @@ export default async function DashboardPage() {
             {/* RIGHT */}
             <div className="flex items-center gap-2">
               {/* NOTIFICATION */}
-              <button className="relative rounded-lg p-2 hover:bg-muted">
+              <button className="relative rounded-lg p-2 hover:border">
                 <Bell className="h-5 w-5" />
                 <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
               </button>
 
               {/* USER DROPDOWN */}
               <DropdownMenu>
-                <DropdownMenuTrigger className="group flex items-center gap-1 rounded-md px-2 py-1 text-sm font-semibold uppercase hover:bg-foreground hover:text-background">
+                <DropdownMenuTrigger className="group flex items-center gap-1 rounded-md px-2 py-1 text-sm font-semibold uppercase hover:border">
                   {displayName}
                   <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-56 text-xs">
-                  <DropdownMenuLabel className="text-[11px] text-muted-foreground">
+                  <DropdownMenuLabel className="text-[11px] text-foreground">
                     Informasi Pengguna
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
 
-                  <DropdownMenuItem className="flex justify-between">
-                    <span>Employee ID</span>
-                    <span className="font-medium">{displayId}</span>
+                  <DropdownMenuItem className="flex justify-between text-foreground">
+                    <span className="text-foreground">Employee ID</span>
+                    <span className="font-medium text-foreground">{displayId}</span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem className="flex justify-between">
-                    <span>Department</span>
-                    <span className="font-medium">{displayDepartment}</span>
+                  <DropdownMenuItem>
+                    <span className="text-foreground">Department</span>
+                    <span className="text-right font-medium text-foreground">{displayDepartment}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -5,7 +5,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
   title: "SYSTIK",
-  description: "Selamat datang di situs saya.",
+  description: "Welcome to Systik App.",
   icons: "/systik.svg",
 }
 

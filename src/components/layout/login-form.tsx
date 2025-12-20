@@ -52,12 +52,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       }
 
       if (data.user) {
-        // PENTING: Refresh router terlebih dahulu agar server-side 
-        // mengetahui adanya cookie session yang baru
         router.refresh()
         
-        // Gunakan push setelah refresh untuk mengarahkan ke dashboard
-        // Gunakan jeda micro-task agar state tersimpan sempurna
         setTimeout(() => {
           window.location.href = "/dashboard"
         }, 500)
@@ -69,10 +65,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   }
 
   return (
-    <div className={cn("flex flex-col gap-4", className)} {...props}>
+    <div className={cn("flex flex-col", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-2">
+          <div className="flex justify-center">
             <Image
               src="/systik.svg"
               alt="SYSTIK logo"
@@ -89,7 +85,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
         <CardContent>
           <form onSubmit={handleSubmit}>
-            <FieldGroup className="flex flex-col gap-4">
+            <FieldGroup className="flex flex-col gap-2">
               {error && (
                 <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md border border-red-200 animate-in fade-in zoom-in duration-200">
                   {error}

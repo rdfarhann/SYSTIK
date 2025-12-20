@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import RealtimeDate from "./realtime-date"
+import RealtimeDate from "../ui/realtime-date"
 import { Card } from "@/components/ui/card"
 import {
   Plus,
@@ -11,6 +11,8 @@ import {
   Calendar,
   LucideIcon,
 } from "lucide-react"
+import Link from "next/link"
+import CreateTicketModal from "../tickets/create-ticket-modal"
 
 export default function DashboardHero() {
   return (
@@ -37,11 +39,7 @@ export default function DashboardHero() {
             <div className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm text-muted-foreground">
               <RealtimeDate />
             </div>
-
-            <Button>
-              <Plus className="mr-1 h-4 w-4" />
-              Create New Ticket
-            </Button>
+              <CreateTicketModal/>
           </div>
         </div>
       </div>

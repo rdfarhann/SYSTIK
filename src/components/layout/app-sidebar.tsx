@@ -17,7 +17,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { NavUser } from "@/components/nav-user"
 import {
   LayoutDashboard,
   Ticket,
@@ -76,7 +75,7 @@ export function AppSidebar({ userProfile }: AppSidebarProps) {
               <AccordionTrigger className="h-12 rounded-lg px-3 hover:bg-background hover:text-foreground">
                 <div className="flex items-center gap-3">
                   <Ticket className="h-5 w-5" />
-                  <span className="font-medium">Ticket Status</span>
+                  <span className="font-medium">All Tickets</span>
                 </div>
               </AccordionTrigger>
 
@@ -104,13 +103,6 @@ export function AppSidebar({ userProfile }: AppSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter className="border-t p-1 ">
-        <NavUser
-          user={{
-            name: userProfile?.full_name ?? "Full Name",
-            email:
-              `${userProfile?.employee_id ?? "EMP"} · ${userProfile?.email ?? "email@company.com"}`,
-          }}
-        />
       </SidebarFooter>
     </Sidebar>
   )
