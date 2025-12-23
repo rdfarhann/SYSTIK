@@ -67,13 +67,15 @@ export default async function UserDashboardPage() {
         }}
       />
 
-      <main className="flex min-h-screen flex-1 flex-col overflow-x-hidden">
-        {/* ================= HEADER ================= */}
-        <header className="flex h-16 items-center border-b px-4 bg-background shrink-0">
+      <main className="flex min-h-screen flex-1 flex-col overflow-x-hidden bg-slate-50/50">
+        {/* ================= HEADER WITH SHADOW ================= */}
+        {/* Menambahkan shadow-sm dan z-index agar header terlihat di atas konten */}
+        <header className="flex h-16 items-center border-b px-4 bg-background shrink-0 shadow-sm z-10">
           <div className="flex w-full items-center justify-between">
             {/* LEFT */}
             <div className="flex items-center gap-2">
-              <SidebarTrigger className="bg-background hover:bg-background hover:text-foreground hover:border"/>
+              {/* Menambahkan shadow-sm pada SidebarTrigger */}
+              <SidebarTrigger className="bg-background hover:bg-background hover:text-foreground hover:border shadow-sm border border-transparent transition-all"/>
               <Separator orientation="vertical" className="h-4" />
 
               <Breadcrumb>
@@ -87,17 +89,21 @@ export default async function UserDashboardPage() {
 
             {/* RIGHT */}
             <div className="flex items-center gap-2">
-              <button className="relative rounded-lg p-2 hover:bg-background hover:border">
-                <Bell className="h-5 w-5 hover:rotate-20" />
+              {/* Notification Button dengan shadow-sm */}
+              <button className="relative rounded-lg p-2 hover:bg-background border border-transparent hover:border-slate-200 hover:shadow-sm transition-all group">
+                <Bell className="h-5 w-5 transition-transform group-hover:rotate-40" />
+                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 border-2 border-background shadow-sm"></span>
               </button>
 
               <DropdownMenu>
-                <DropdownMenuTrigger className="group flex items-center gap-1 rounded-md px-2 py-1 text-[10px] sm:text-sm font-semibold uppercase hover:bg-background hover:border outline-none">
+                {/* Profile Trigger dengan shadow-sm saat hover */}
+                <DropdownMenuTrigger className="group flex items-center gap-1 rounded-md px-2 py-1.5 text-[10px] sm:text-sm font-semibold uppercase border border-transparent hover:border-slate-200 hover:bg-background hover:shadow-sm outline-none transition-all">
                   <span className="max-w-[80px] sm:max-w-none truncate">{displayName}</span>
                   <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-56 text-xs">
+                {/* Dropdown Content dengan shadow-lg yang kuat */}
+                <DropdownMenuContent align="end" className="w-56 text-xs shadow-lg shadow-black/10 border-slate-200 animate-in fade-in zoom-in-95">
                   <DropdownMenuLabel className="text-[11px] text-foreground">
                     Informasi Pengguna
                   </DropdownMenuLabel>
@@ -106,12 +112,12 @@ export default async function UserDashboardPage() {
 
                   <DropdownMenuItem className="flex justify-between text-foreground">
                     <span>Employee ID</span>
-                    <span className="font-medium">{displayId}</span>
+                    <span className="font-bold text-foreground">{displayId}</span>
                   </DropdownMenuItem>
 
                   <DropdownMenuItem className="flex justify-between text-foreground">
                     <span>Department</span>
-                    <span className="font-medium text-right">
+                    <span className="font-medium text-right text-muted-foreground">
                       {displayDepartment}
                     </span>
                   </DropdownMenuItem>
@@ -122,7 +128,7 @@ export default async function UserDashboardPage() {
                     <form action={logout} className="w-full">
                       <button
                         type="submit"
-                        className="flex w-full items-center gap-2 text-red-600 hover:text-red-700"
+                        className="flex w-full items-center gap-2 text-red-600 font-semibold hover:text-red-700 transition-colors"
                       >
                         <LogOut className="h-4 w-4" />
                         Logout

@@ -1,8 +1,10 @@
 "use client"
 
 import * as React from "react"
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 import {
   Sidebar,
@@ -15,13 +17,6 @@ import {
 } from "@/components/ui/sidebar"
 
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-
-import {
   LayoutDashboard,
   Ticket,
   Users,
@@ -29,6 +24,7 @@ import {
   BarChart3,
   Settings,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react"
 
 interface AppSidebarAdminProps {
@@ -39,115 +35,140 @@ interface AppSidebarAdminProps {
 }
 
 export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
+  const [isTicketsOpen, setIsTicketsOpen] = useState(false)
+  const pathname = usePathname()
+
+  const subMenuItems = [
+    { label: "All Tickets", href: "/dashboard/tickets" },
+    { label: "Open", href: "/dashboard/tickets/open" },
+    { label: "In Progress", href: "/dashboard/tickets/progress" },
+    { label: "Closed", href: "/dashboard/tickets/closed" },
+    { label: "Canceled", href: "/dashboard/tickets/canceled" },
+  ]
+
   return (
-    <Sidebar className="w-64 bg-primary text-background">
+    <Sidebar className="w-64 bg-primary text-background border-r-0 shadow-xl">
       {/* ================= HEADER ================= */}
-      <SidebarHeader>
-        <div className="flex items-center gap-3 px-2 py-3">
-          <Image
-            src="/systik_round.png"
-            width={40}
-            height={40}
-            alt="Logo"
-          />
-          <div className="leading-tight">
-            <p className="font-bold text-lg">SYSTIK</p>
-            <p className="text-xs opacity-80">Admin Panel</p>
+      <SidebarHeader className="border-b border-white/10">
+        <div className="flex items-center gap-3 px-3 py-4">
+          <div className="bg-white/10 p-1.5 rounded-xl shadow-lg border border-white/10 shrink-0">
+            <Image
+              src="/systik_round.png"
+              width={32}
+              height={32}
+              alt="Logo"
+              className="drop-shadow-md"
+            />
+          </div>
+          <div className="leading-tight min-w-0">
+            <p className="font-bold text-lg tracking-tight truncate drop-shadow-sm">SYSTIK</p>
+            <p className="text-[10px] uppercase tracking-widest opacity-70 font-bold truncate">Admin Panel</p>
           </div>
         </div>
       </SidebarHeader>
 
       {/* ================= CONTENT ================= */}
-      <SidebarContent className="px-2 py-3 space-y-2">
-        <SidebarMenu>
+      <SidebarContent className="px-3">
+        <SidebarMenu className="gap-1">
+          
           {/* DASHBOARD */}
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="h-12 gap-3 rounded-lg px-3">
-              <Link href="/dashboard">
-                <LayoutDashboard className="h-5 w-5" />
-                <span className="font-medium">Dashboard</span>
+            <SidebarMenuButton asChild className="h-10 px-3 active:scale-[0.98] transition-all">
+              <Link href="/dashboard" className="flex items-center gap-3 w-full">
+                <LayoutDashboard className="h-5 w-5 shrink-0" />
+                <span className="font-medium text-[14px]">Dashboard</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* ================= TICKET MANAGEMENT ================= */}
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="tickets" className="border-none">
-              <AccordionTrigger className="h-12 rounded-lg px-3 hover:bg-background hover:text-foreground">
-                <div className="flex items-center gap-3">
-                  <Ticket className="h-5 w-5" />
-                  <span className="font-medium">Ticket Management</span>
-                </div>
-              </AccordionTrigger>
+          {/* TICKET MANAGEMENT (MANUAL DROP-DOWN - NO WRAP) */}
+          <SidebarMenuItem className="flex flex-col">
+            <button 
+              onClick={() => setIsTicketsOpen(!isTicketsOpen)}
+              className="flex items-center justify-between h-10 w-full px-3 rounded-md hover:bg-background hover:text-foreground transition-all group"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <Ticket className="h-5 w-5 shrink-0" />
+                <span className="font-medium text-[14px] whitespace-nowrap overflow-hidden">
+                  Ticket Management
+                </span>
+              </div>
+              <ChevronDown className={`h-4 w-4 shrink-0 transition-transform duration-300 ${isTicketsOpen ? 'rotate-180' : ''}`} />
+            </button>
 
-              <AccordionContent className="pt-1 space-y-1 text-background">
-                {[
-                  { label: "All Tickets", href: "/dashboard/tickets" },
-                  { label: "Open", href: "/dashboard/tickets/open" },
-                  { label: "In Progress", href: "/dashboard/tickets/progress" },
-                  { label: "Closed", href: "/dashboard/tickets/closed" },
-                ].map((item) => (
+            {/* SUB-MENU CONTAINER */}
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isTicketsOpen ? 'max-h-60 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+              <div className="ml-5 border-l-2 border-white/10 flex flex-col gap-0.5">
+                {subMenuItems.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="flex h-11 items-center gap-3 rounded-md px-9 text-sm hover:bg-background hover:text-foreground"
+                    className="flex h-9 items-center gap-2 pl-4 pr-2 text-[13px] text-white/70 hover:text-foreground hover:bg-white rounded-r-md transition-colors whitespace-nowrap"
                   >
-                    <ChevronRight className="h-4 w-4 opacity-60" />
+                    <ChevronRight className="h-3 w-3 opacity-40 shrink-0" />
                     {item.label}
                   </Link>
                 ))}
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+              </div>
+            </div>
+          </SidebarMenuItem>
 
-          {/* USER MANAGEMENT */}
+          {/* LAINNYA */}
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="h-12 gap-3 rounded-lg px-3">
-              <Link href="/dashboard/admin/users">
-                <Users className="h-5 w-5" />
-                <span className="font-medium">User Management</span>
+            <SidebarMenuButton asChild className="h-10 px-3 ">
+              <Link href="/dashboard/admin/users" className="flex items-center gap-3">
+                <Users className="h-5 w-5 shrink-0" />
+                <span className="font-medium text-[14px]">User Management</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* AGENT MANAGEMENT */}
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="h-12 gap-3 rounded-lg px-3">
-              <Link href="/dashboard/admin/agents">
-                <UserCog className="h-5 w-5" />
-                <span className="font-medium">Agent Management</span>
+            <SidebarMenuButton asChild className="h-10 px-3 ">
+              <Link href="/dashboard/admin/agents" className="flex items-center gap-3">
+                <UserCog className="h-5 w-5 shrink-0" />
+                <span className="font-medium text-[14px]">Agent Management</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* REPORTS */}
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="h-12 gap-3 rounded-lg px-3">
-              <Link href="/dashboard/admin/reports">
-                <BarChart3 className="h-5 w-5" />
-                <span className="font-medium">Reports</span>
+            <SidebarMenuButton asChild className="h-10 px-3 ">
+              <Link href="/dashboard/admin/reports" className="flex items-center gap-3">
+                <BarChart3 className="h-5 w-5 shrink-0" />
+                <span className="font-medium text-[14px]">Reports</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* SETTINGS */}
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="h-12 gap-3 rounded-lg px-3">
-              <Link href="/dashboard/admin/settings">
-                <Settings className="h-5 w-5" />
-                <span className="font-medium">Settings</span>
+            <SidebarMenuButton asChild className="h-10 px-3 ">
+              <Link href="/dashboard/admin/settings" className="flex items-center gap-3">
+                <Settings className="h-5 w-5 shrink-0" />
+                <span className="font-medium text-[14px]">Settings</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
+
         </SidebarMenu>
       </SidebarContent>
 
       {/* ================= FOOTER ================= */}
-      <SidebarFooter className="border-t border-white/20 px-3 py-3 text-xs opacity-80">
-        Logged in as <br />
-        <span className="font-semibold">
-          {userProfile?.full_name ?? "Admin"}
-        </span>
+      <SidebarFooter className="border-t border-white/10 px-4 py-4 bg-black/10">
+        <div className="flex flex-col gap-1.5">
+          <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold">Logged In As</p>
+          <div className="flex items-center gap-3">
+             <div className="h-8 w-8 rounded-full bg-white/15 flex items-center justify-center text-[11px] font-bold shadow-inner shrink-0 border border-white/5">
+               {userProfile?.full_name?.substring(0,2).toUpperCase() ?? "AD"}
+             </div>
+             <div className="min-w-0">
+                <p className="font-semibold text-[13px] truncate drop-shadow-sm leading-none mb-1">
+                  {userProfile?.full_name ?? "Admin"}
+                </p>
+                <p className="text-[10px] opacity-50 truncate leading-none italic">Administrator</p>
+             </div>
+          </div>
+        </div>
       </SidebarFooter>
     </Sidebar>
   )
