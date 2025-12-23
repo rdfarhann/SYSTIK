@@ -11,8 +11,17 @@ export async function POST(req: Request) {
   })
 
   if (error || !data.user) {
-    return NextResponse.json({ error: error?.message || "Login gagal" }, { status: 401 })
+    return NextResponse.json(
+      { error: "Email atau password salah" },
+      { status: 401 }
+    )
   }
 
-  return NextResponse.json({ success: true, user: data.user })
+  return NextResponse.json({
+    success: true,
+    user: {
+      id: data.user.id,
+      email: data.user.email,
+    },
+  })
 }

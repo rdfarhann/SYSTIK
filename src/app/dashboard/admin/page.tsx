@@ -1,9 +1,13 @@
 import { redirect } from "next/navigation"
+
+/* ================= UI PROVIDER & SIDEBAR ================= */
 import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { AppSidebarAdmin } from "@/components/layout/app-sidebar-admin"
+
+/* ================= UI COMPONENTS ================= */
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,18 +16,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb"
+
 import { Separator } from "@/components/ui/separator"
+
+/* ================= LIB ================= */
 import { createSupabaseServer } from "@/lib/supabase/server"
+
+/* ================= ICONS ================= */
 import { ChevronDown, Bell, LogOut } from "lucide-react"
+
+/* ================= COMPONENTS ================= */
 import DashboardHero from "@/components/layout/dashboard-hero"
 
-
+/* ================= LOGOUT ACTION ================= */
 async function logout() {
   "use server"
   const supabase = await createSupabaseServer()
@@ -31,7 +43,7 @@ async function logout() {
   redirect("/")
 }
 
-export default async function UserDashboardPage() {
+export default async function AdminDashboardPage() {
   /* ================= AUTH ================= */
   const supabase = await createSupabaseServer()
 
@@ -41,20 +53,36 @@ export default async function UserDashboardPage() {
 
   if (!user) redirect("/")
 
-  /* ================= PROFILE ================= */
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select(`
-      full_name,
-      employee_id,
-      department
-    `)
-    .eq("id", user.id)
-    .single()
+ /* ================= PROFILE + ROLE ================= */
+const { data: profile } = await supabase
+  .from("profiles")
+  .select(`
+    full_name,
+    employee_id,
+    department,
+    user_roles (
+      roles (
+        name
+      )
+    )
+  `)
+  .eq("id", user.id)
+  .single()
 
-  if (!profile) redirect("/")
+if (!profile) redirect("/")
 
-  const displayName = profile.full_name ?? "User"
+const role =
+  profile.user_roles?.[0]?.roles?.[0]?.name ?? null
+
+if (!role) redirect("/")
+
+/* ================= ROLE GUARD ================= */
+// 🔐 ADMIN ONLY
+if (role !== "admin") {
+  redirect(`/dashboard/${role}`)
+}
+
+  const displayName = profile.full_name ?? "Admin"
   const displayId = profile.employee_id ?? "-"
   const displayDepartment = profile.department ?? "-"
 
@@ -67,19 +95,19 @@ export default async function UserDashboardPage() {
         }}
       />
 
-      <main className="flex min-h-screen flex-1 flex-col overflow-x-hidden">
+      <main className="flex min-h-screen flex-1 flex-col">
         {/* ================= HEADER ================= */}
-        <header className="flex h-16 items-center border-b px-4 bg-background shrink-0">
+        <header className="flex h-16 items-center border-b px-4">
           <div className="flex w-full items-center justify-between">
             {/* LEFT */}
             <div className="flex items-center gap-2">
-              <SidebarTrigger className="bg-background hover:bg-background hover:text-foreground hover:border"/>
+              <SidebarTrigger />
               <Separator orientation="vertical" className="h-4" />
 
               <Breadcrumb>
                 <BreadcrumbList>
-                  <BreadcrumbItem className="font-semibold text-xs sm:text-sm">
-                    <BreadcrumbLink>Dashboard</BreadcrumbLink>
+                  <BreadcrumbItem className="font-semibold">
+                    <BreadcrumbLink>Admin Dashboard</BreadcrumbLink>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
@@ -87,29 +115,29 @@ export default async function UserDashboardPage() {
 
             {/* RIGHT */}
             <div className="flex items-center gap-2">
-              <button className="relative rounded-lg p-2 hover:bg-background hover:border">
-                <Bell className="h-5 w-5 hover:rotate-20" />
+              <button className="relative rounded-lg p-2 hover:border">
+                <Bell className="h-5 w-5" />
               </button>
 
               <DropdownMenu>
-                <DropdownMenuTrigger className="group flex items-center gap-1 rounded-md px-2 py-1 text-[10px] sm:text-sm font-semibold uppercase hover:bg-background hover:border outline-none">
-                  <span className="max-w-[80px] sm:max-w-none truncate">{displayName}</span>
+                <DropdownMenuTrigger className="group flex items-center gap-1 rounded-md px-2 py-1 text-sm font-semibold uppercase hover:border">
+                  {displayName}
                   <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-56 text-xs">
-                  <DropdownMenuLabel className="text-[11px] text-foreground">
+                  <DropdownMenuLabel className="text-[11px]">
                     Informasi Pengguna
                   </DropdownMenuLabel>
 
                   <DropdownMenuSeparator />
 
-                  <DropdownMenuItem className="flex justify-between text-foreground">
+                  <DropdownMenuItem className="flex justify-between">
                     <span>Employee ID</span>
                     <span className="font-medium">{displayId}</span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem className="flex justify-between text-foreground">
+                  <DropdownMenuItem className="flex justify-between">
                     <span>Department</span>
                     <span className="font-medium text-right">
                       {displayDepartment}
@@ -122,7 +150,7 @@ export default async function UserDashboardPage() {
                     <form action={logout} className="w-full">
                       <button
                         type="submit"
-                        className="flex w-full items-center gap-2 text-red-600 hover:text-red-700"
+                        className="flex w-full items-center gap-2 text-red-600"
                       >
                         <LogOut className="h-4 w-4" />
                         Logout
@@ -135,7 +163,8 @@ export default async function UserDashboardPage() {
           </div>
         </header>
 
-        <section className="flex flex-1 flex-col p-0 sm:p-6">
+        {/* ================= CONTENT ================= */}
+        <section className="flex flex-1 flex-col gap-6 p-6">
           <DashboardHero />
         </section>
       </main>
