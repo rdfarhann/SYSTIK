@@ -47,7 +47,7 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
   ]
 
   return (
-    <Sidebar className="w-64 bg-primary text-background border-r-0 shadow-xl">
+    <Sidebar className="w-64 bg-sidebar text-background border-r-0 shadow-xl">
       {/* ================= HEADER ================= */}
       <SidebarHeader className="border-b border-white/10">
         <div className="flex items-center gap-3 px-3 py-4">
@@ -103,7 +103,7 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="flex h-9 items-center gap-2 pl-4 pr-2 text-[13px] text-white/70 hover:text-foreground hover:bg-white rounded-r-md transition-colors whitespace-nowrap"
+                    className="flex h-9 items-center gap-2 pl-4 pr-2 text-[14px] text-white/70 hover:text-foreground hover:bg-white rounded-r-md transition-colors whitespace-nowrap"
                   >
                     <ChevronRight className="h-3 w-3 opacity-40 shrink-0" />
                     {item.label}
@@ -116,7 +116,7 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
           {/* LAINNYA */}
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="h-10 px-3 ">
-              <Link href="/dashboard/admin/users" className="flex items-center gap-3">
+              <Link href="/dashboard/user-management" className="flex items-center gap-3">
                 <Users className="h-5 w-5 shrink-0" />
                 <span className="font-medium text-[14px]">User Management</span>
               </Link>

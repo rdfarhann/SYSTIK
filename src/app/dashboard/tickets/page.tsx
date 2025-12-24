@@ -85,7 +85,7 @@ export default async function TicketsPage() {
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem className="font-bold text-xs sm:text-sm">
-                    <BreadcrumbLink className="text-foreground cursor-default opacity-60">Tickets</BreadcrumbLink>
+                    <BreadcrumbLink className="text-foreground cursor-default opacity-60">All Tickets</BreadcrumbLink>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
@@ -95,7 +95,7 @@ export default async function TicketsPage() {
             <div className="flex items-center gap-3">
                <button className="p-2 hover:bg-background rounded-full transition-all relative hover:rotate-45">
                   <Bell className="h-5 w-5 text-foreground " />
-                  <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-primary rounded-full border-2 border-background"></span>
+                  <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full border-2 border-background"></span>
                </button>
             </div>
           </div>

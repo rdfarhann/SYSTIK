@@ -28,7 +28,9 @@ import {
   MoreHorizontal, 
   ChevronLeft, 
   ChevronRight,
-  Ticket
+  Ticket,
+  User,
+  Building2
 } from "lucide-react"
 
 /* ================= TYPES & INTERFACES ================= */
@@ -39,27 +41,39 @@ interface TicketData {
   priority: string
   status: string
   date: string
+  user: string
+  department: string
 }
 
 /* ================= DATA DUMMY ================= */
 const allTickets: TicketData[] = [
-  { id: "T-2401", title: "Install Ulang PC Keuangan", category: "Hardware", priority: "High", status: "Open", date: "23/12/2025" },
-  { id: "T-2402", title: "Lupa Password Email", category: "Account", priority: "Medium", status: "In Progress", date: "22/12/2025" },
-  { id: "T-2403", title: "Printer Macet Lantai 2", category: "Hardware", priority: "Low", status: "Closed", date: "21/12/2025" },
-  { id: "T-2404", title: "Akses VPN Bermasalah", category: "Network", priority: "High", status: "Canceled", date: "20/12/2025" },
-  { id: "T-2405", title: "Update Aplikasi HRIS", category: "Software", priority: "Medium", status: "Open", date: "19/12/2025" },
-  { id: "T-2406", title: "Keyboard Macet", category: "Hardware", priority: "Low", status: "Closed", date: "18/12/2025" },
-]
+  { id: "T-2401", title: "Install Ulang PC Keuangan", category: "Hardware", priority: "High", status: "Open", date: "23/12/2025", user: "Budi Santoso", department: "Finance" },
+  { id: "T-2402", title: "Lupa Password Email", category: "Account", priority: "Medium", status: "In Progress", date: "22/12/2025", user: "Siti Aminah", department: "HRD" },
+  { id: "T-2403", title: "Printer Macet Lantai 2", category: "Hardware", priority: "Low", status: "Closed", date: "21/12/2025", user: "Agus Setiawan", department: "Operations" },
+  { id: "T-2404", title: "Akses VPN Bermasalah", category: "Network", priority: "High", status: "Canceled", date: "20/12/2025", user: "Dewi Lestari", department: "IT" },
+  { id: "T-2405", title: "Update Aplikasi HRIS", category: "Software", priority: "Medium", status: "Open", date: "19/12/2025", user: "Eko Prasetyo", department: "HRD" },
+  { id: "T-2406", title: "Keyboard Macet", category: "Hardware", priority: "Low", status: "Closed", date: "18/12/2025", user: "Indah Permata", department: "Finance" },
+  { id: "T-2407", title: "Setting Email Outlook Baru", category: "Account", priority: "Medium", status: "Open", date: "17/12/2025", user: "Rian Hidayat", department: "Sales" },
+  { id: "T-2408", title: "Layar Monitor Bergaris", category: "Hardware", priority: "High", status: "In Progress", date: "16/12/2025", user: "Maya Safitri", department: "Marketing" },
+  { id: "T-2409", title: "Wifi Lemot di Meeting Room", category: "Network", priority: "Medium", status: "Open", date: "15/12/2025", user: "Dedi Kurniawan", department: "General Affairs" },
+  { id: "T-2410", title: "Error Input Data Sales", category: "Software", priority: "High", status: "Closed", date: "14/12/2025", user: "Ani Wijaya", department: "Sales" },
+  { id: "T-2411", title: "Request Mouse Wireless", category: "Hardware", priority: "Low", status: "Open", date: "13/12/2025", user: "Fajar Nugraha", department: "Finance" },
+  { id: "T-2412", title: "Integrasi API Payment", category: "Software", priority: "High", status: "In Progress", date: "12/12/2025", user: "Kevin Sanjaya", department: "IT" },
+  { id: "T-2413", title: "Kabel LAN Terputus", category: "Network", priority: "Medium", status: "Closed", date: "11/12/2025", user: "Siska Putri", department: "Warehouse" },
+  { id: "T-2414", title: "Izin Instalasi Photoshop", category: "Software", priority: "Low", status: "Canceled", date: "10/12/2025", user: "Bambang Sugio", department: "Creative" },
+  { id: "T-2415", title: "Ganti Toner Printer HR", category: "Hardware", priority: "Medium", status: "Open", date: "09/12/2025", user: "Raden Muhamad Farhan", department: "Administrator" },
+];
 
 export default function AllTicketsTable() {
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
+  const itemsPerPage = 8
 
   const filteredTickets = useMemo(() => {
     return allTickets.filter(ticket => 
       ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.title.toLowerCase().includes(searchTerm.toLowerCase())
+      ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.user.toLowerCase().includes(searchTerm.toLowerCase())
     )
   }, [searchTerm])
 
@@ -67,143 +81,129 @@ export default function AllTicketsTable() {
   const currentItems = filteredTickets.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between px-1 sm:px-0">
-        <div className="relative w-full sm:w-96 group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+    <div className="space-y-4">
+      {/* Search & Actions */}
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between px-1">
+        <div className="relative w-full sm:w-80 group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary" />
           <input 
-            placeholder="Search ticket..." 
-            className="flex h-10 w-full rounded-xl border border-muted-foreground/20 bg-background px-10 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-sm font-medium transition-all"
+            placeholder="Cari tiket atau user..." 
+            className="flex h-9 w-full rounded-lg border border-input bg-background px-9 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary shadow-sm"
             value={searchTerm}
             onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1);}}
           />
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-          <Button variant="outline" size="sm" className="flex-1 sm:flex-none gap-2 font-bold shadow-md rounded-xl border-muted-foreground/10"><Filter className="h-4 w-4" /> Filter</Button>
-          <Button variant="outline" size="sm" className="flex-1 sm:flex-none gap-2 font-bold shadow-md rounded-xl border-muted-foreground/10"><ArrowUpDown className="h-4 w-4" /> Sort</Button>
+          <Button variant="outline" size="sm" className="rounded-lg font-semibold"><Filter className="h-3.5 w-3.5 mr-2" /> Filter</Button>
+          <Button variant="outline" size="sm" className="rounded-lg font-semibold"><ArrowUpDown className="h-3.5 w-3.5 mr-2" /> Sort</Button>
         </div>
       </div>
 
-      <Card className="rounded-2xl border shadow-2xl shadow-black/10 overflow-hidden bg-primary border-white/10">
-        <div className="p-4 sm:p-6 text-background">
-          <h2 className="text-lg sm:text-xl font-bold tracking-tight drop-shadow-sm uppercase">Ticket Database</h2>
-          <p className="text-xs sm:text-sm font-medium opacity-90">Total {filteredTickets.length} support activities monitored.</p>
-        </div>
-
-        <div className="overflow-x-auto w-full">
-          <div className="inline-block min-w-[900px] w-full align-middle">
-            <Table>
-              <TableHeader className="bg-background shadow-sm">
-                <TableRow className="hover:bg-transparent border-none">
-                  <TableHead className="w-[120px] py-4 px-6 font-bold text-foreground">ID TICKET</TableHead>
-                  <TableHead className="min-w-[250px] py-4 font-bold text-foreground">TITLE</TableHead>
-                  <TableHead className="py-4 font-bold text-foreground">CATEGORY</TableHead>
-                  <TableHead className="py-4 font-bold text-foreground">PRIORITY</TableHead>
-                  <TableHead className="py-4 font-bold text-foreground text-center">STATUS</TableHead>
-                  <TableHead className="py-4 font-bold text-foreground text-center">DATE</TableHead>
-                  <TableHead className="w-[120px] py-4 px-6 text-right font-bold text-foreground">ACTION</TableHead>
+      <Card className="rounded-xl border shadow-sm overflow-hidden border-slate-200">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-slate-50">
+              <TableRow className="border-b border-slate-200">
+                <TableHead className="w-[100px] font-bold text-slate-700 px-6">ID</TableHead>
+                <TableHead className="font-bold text-slate-700">TITLE & REQUESTER</TableHead>
+                <TableHead className="font-bold text-slate-700 text-center">PRIORITY</TableHead>
+                <TableHead className="font-bold text-slate-700 text-center">STATUS</TableHead>
+                <TableHead className="font-bold text-slate-700 text-center">DATE</TableHead>
+                <TableHead className="w-[100px] text-right font-bold text-slate-700 px-6">ACTION</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {currentItems.map((ticket) => (
+                <TableRow key={ticket.id} className="hover:bg-slate-50/50 transition-colors border-b last:border-0">
+                  <TableCell className="px-6 font-mono font-bold text-primary">{ticket.id}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-slate-900 leading-none">{ticket.title}</span>
+                      <span className="text-[10px] mt-1 text-slate-500 font-medium uppercase tracking-tight">{ticket.user} • {ticket.department}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="outline" className={`px-2 py-0 rounded-full text-[10px] font-bold ${getPriorityStyle(ticket.priority)}`}>
+                      {ticket.priority}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-center">{getStatusBadge(ticket.status)}</TableCell>
+                  <TableCell className="text-center text-xs font-medium text-slate-600">{ticket.date}</TableCell>
+                  <TableCell className="px-6 text-right">
+                    <div className="flex justify-end gap-1">
+                      <TicketDetailModal ticket={ticket} />
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentItems.length > 0 ? (
-                  currentItems.map((ticket) => (
-                    <TableRow key={ticket.id} className="hover:bg-muted/10 transition-all border-b last:border-0 border-background/20 group">
-                      <TableCell className="py-4 px-6 font-mono font-bold text-background drop-shadow-sm">{ticket.id}</TableCell>
-                      <TableCell className="py-4">
-                        <div className="flex flex-col text-background">
-                          <span className="font-semibold leading-none drop-shadow-sm">{ticket.title}</span>
-                          <span className="text-[11px] mt-1.5 uppercase tracking-tighter opacity-80 font-bold italic">Support Request</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-4 text-sm font-medium text-background">{ticket.category}</TableCell>
-                      <TableCell className="py-4">
-                        <Badge variant="outline" className={`px-2.5 py-0.5 rounded-full shadow-sm border font-bold ${getPriorityStyle(ticket.priority)}`}>{ticket.priority}</Badge>
-                      </TableCell>
-                      <TableCell className="py-4 text-center">{getStatusBadge(ticket.status)}</TableCell>
-                      <TableCell className="py-4 text-right font-medium text-background tabular-nums text-sm">{ticket.date}</TableCell>
-                      <TableCell className="py-4 px-6 text-right">
-                        <div className="flex justify-end gap-2">
-                          <TicketDetailModal ticket={ticket} />
-                          <Button variant="ghost" size="icon" className="h-9 w-9 text-background hover:bg-white/20 hover:text-white"><MoreHorizontal className="h-4.5 w-4.5" /></Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow><TableCell colSpan={7} className="py-10 text-center text-background font-bold opacity-50 italic">No tickets found.</TableCell></TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </Card>
 
-      <div className="flex items-center justify-between px-2 pb-10 font-bold text-muted-foreground uppercase text-[10px] tracking-widest">
-        <span>Page {currentPage} / {totalPages || 1}</span>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg shadow-sm" onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4" /></Button>
-          <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg shadow-sm" onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}><ChevronRight className="h-4 w-4" /></Button>
+      {/* Pagination */}
+      <div className="flex items-center justify-between px-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+        <span>Page {currentPage} of {totalPages || 1}</span>
+        <div className="flex gap-1">
+          <Button variant="outline" size="icon" className="h-7 w-7 rounded-md" onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4" /></Button>
+          <Button variant="outline" size="icon" className="h-7 w-7 rounded-md" onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}><ChevronRight className="h-4 w-4" /></Button>
         </div>
       </div>
     </div>
   )
 }
 
-/* ================= DETAIL MODAL COMPONENT (SIMPLE & FUNCTIONAL) ================= */
+/* ================= COMPACT DETAIL MODAL ================= */
 function TicketDetailModal({ ticket }: { ticket: TicketData }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-10 w-10 text-background hover:bg-white/20 hover:text-white transition-all shadow-sm"
-        >
-          <Eye className="h-5 w-5" />
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100 hover:text-primary transition-all shadow-sm">
+          <Eye className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-none shadow-2xl rounded-2xl bg-white">
-        {/* HEADER */}
-        <div className="bg-primary px-8 py-10 text-background relative">
-          <DialogHeader className="relative z-10 space-y-1">
-            <div className="flex items-center gap-2 opacity-70 mb-1">
-              <Ticket className="h-4 w-4" />
-              <span className="text-[10px] font-black tracking-[0.2em] uppercase">Support Ticket</span>
+      <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden border-none shadow-2xl rounded-xl bg-white">
+        {/* Header Ramping (Warna Hijau) */}
+        <div className="bg-primary px-6 py-5 text-white relative">
+          <div className="relative z-10 flex flex-col gap-0.5">
+            <div className="flex items-center gap-1.5 opacity-80">
+              <Ticket className="h-3 w-3" />
+              <span className="text-[8px] font-black tracking-[0.2em] uppercase">Support Ticket</span>
             </div>
-            <DialogTitle className="text-3xl font-bold tracking-tight uppercase">
-              {ticket.id}
-            </DialogTitle>
-            <p className="text-lg font-medium opacity-90 leading-snug">
-              {ticket.title}
-            </p>
-          </DialogHeader>
+            <DialogTitle className="text-xl font-bold tracking-tight uppercase leading-none">{ticket.id}</DialogTitle>
+            <p className="text-xs font-medium opacity-90 truncate">{ticket.title}</p>
+          </div>
         </div>
 
-        {/* CONTENT SECTION */}
-        <div className="p-8 space-y-6">
-          <div className="grid grid-cols-2 gap-8">
+        {/* Content Ramping */}
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-100">
+            <DetailItem label="Requester" value={ticket.user} icon={<User className="h-3 w-3 mr-1" />} />
+            <DetailItem label="Dept" value={ticket.department} icon={<Building2 className="h-3 w-3 mr-1" />} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <DetailItem label="Category" value={ticket.category} />
             <DetailItem label="Priority" value={ticket.priority} isBadge priority={ticket.priority} />
           </div>
 
-          <div className="grid grid-cols-2 gap-8 pt-6 border-t border-slate-100">
-            <DetailItem label="Date Created" value={ticket.date} />
-            <DetailItem label="Status" value={ticket.status} isStatus />
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+            <DetailItem label="Created At" value={ticket.date} />
+            <DetailItem label="Current Status" value={ticket.status} isStatus />
           </div>
 
-          <div className="mt-6 pt-6 border-t border-slate-100">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">System Message</p>
-            <p className="text-sm text-slate-600 leading-relaxed italic">
-              &quot;Informasi detail mengenai tiket ini tercatat secara otomatis oleh sistem. Silakan proses sesuai SOP.&quot;
+          <div className="pt-3 border-t border-slate-50">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic">
+              * Detail tercatat otomatis oleh sistem.
             </p>
           </div>
         </div>
 
-        {/* FOOTER ACTION */}
-        <div className="px-8 py-4 bg-slate-50 flex justify-end gap-3">
+        <div className="px-5 py-3 bg-slate-50 flex justify-end border-t">
           <DialogClose asChild>
-            <Button variant="outline" className="font-bold rounded-lg border-slate-200">
+            <Button variant="outline" size="sm" className="h-8 text-xs font-bold rounded-lg px-4 border-slate-200">
               Close View
             </Button>
           </DialogClose>
@@ -213,30 +213,23 @@ function TicketDetailModal({ ticket }: { ticket: TicketData }) {
   )
 }
 
-/* ================= DETAIL ITEM (SIMPLE TYPOGRAPHY) ================= */
-function DetailItem({ label, value, isBadge, isStatus, priority }: { label: string, value: string, isBadge?: boolean, isStatus?: boolean, priority?: string }) {
+/* ================= COMPACT DETAIL ITEM ================= */
+function DetailItem({ label, value, isBadge, isStatus, priority, icon }: { label: string, value: string, isBadge?: boolean, isStatus?: boolean, priority?: string, icon?: React.ReactNode }) {
   return (
-    <div className="space-y-1.5">
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-        {label}
-      </p>
-      
+    <div className="flex flex-col items-center justify-center text-center">
+      <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
       {isBadge ? (
-        <div className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-bold ring-1 ring-inset ${
-          priority === 'High' ? 'bg-red-50 text-red-700 ring-red-600/20' : 
-          priority === 'Medium' ? 'bg-amber-50 text-amber-700 ring-amber-600/20' : 
-          'bg-slate-50 text-slate-700 ring-slate-600/20'
-        }`}>
+        <Badge variant="outline" className={`px-2.5 py-0 rounded-full text-[9px] font-bold ${getPriorityStyle(priority || '')}`}>
           {value}
-        </div>
+        </Badge>
       ) : isStatus ? (
-        <p className="font-bold text-foreground text-base uppercase tracking-tight">
-          {value}
-        </p>
+        <p className={`font-black text-base uppercase tracking-tighter ${
+          value === 'Open' ? 'text-emerald-600' : 
+          value === 'In Progress' ? 'text-amber-500' : 
+          value === 'Closed' ? 'text-slate-500' : 'text-red-600'
+        }`}>{value}</p>
       ) : (
-        <p className="font-semibold text-base text-slate-900 leading-none">
-          {value}
-        </p>
+        <p className="font-bold text-xs text-slate-800 flex items-center">{icon}{value}</p>
       )}
     </div>
   )
@@ -250,9 +243,9 @@ function getPriorityStyle(priority: string) {
 }
 
 function getStatusBadge(status: string) {
-  const base = "px-3 py-1 rounded-full font-bold text-[11px] uppercase tracking-wider shadow-md border-b-2 active:translate-y-[1px] transition-all"
-  if (status === "Open") return <Badge className={`${base} bg-blue-600 border-blue-800 text-white`}>Open</Badge>
-  if (status === "In Progress") return <Badge className={`${base} bg-amber-500 border-amber-700 text-white`}>In Progress</Badge>
-  if (status === "Closed") return <Badge className={`${base} bg-green-600 border-green-800 text-white`}>Closed</Badge>
-  return <Badge className={`${base} bg-red-600 border-red-800 text-white`}>Canceled</Badge>
+  const base = "px-2 py-0 rounded-full font-bold text-[9px] uppercase tracking-wider shadow-sm border-b-2 inline-block mx-auto text-white"
+  if (status === "Open") return <Badge className={`${base} bg-emerald-600 border-emerald-800`}>Open</Badge>
+  if (status === "In Progress") return <Badge className={`${base} bg-amber-500 border-amber-700`}>In Progress</Badge>
+  if (status === "Closed") return <Badge className={`${base} bg-slate-500 border-slate-700`}>Closed</Badge>
+  return <Badge className={`${base} bg-red-600 border-red-800`}>Canceled</Badge>
 }
