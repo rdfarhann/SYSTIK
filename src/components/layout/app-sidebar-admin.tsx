@@ -40,10 +40,10 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
 
   const subMenuItems = [
     { label: "All Tickets", href: "/dashboard/tickets" },
-    { label: "Open", href: "/dashboard/tickets/open" },
-    { label: "In Progress", href: "/dashboard/tickets/progress" },
-    { label: "Closed", href: "/dashboard/tickets/closed" },
-    { label: "Canceled", href: "/dashboard/tickets/canceled" },
+    { label: "Open", href: "/dashboard/tickets?status=open" },
+    { label: "In Progress", href: "/dashboard/tickets?status=in-progress" },
+    { label: "Closed", href: "/dashboard/tickets?status=closed" },
+    { label: "Canceled", href: "/dashboard/tickets?status=canceled" },
   ]
 
   return (
@@ -119,15 +119,6 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
               <Link href="/dashboard/user-management" className="flex items-center gap-3">
                 <Users className="h-5 w-5 shrink-0" />
                 <span className="font-medium text-[14px]">User Management</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild className="h-10 px-3 ">
-              <Link href="/dashboard/admin/agents" className="flex items-center gap-3">
-                <UserCog className="h-5 w-5 shrink-0" />
-                <span className="font-medium text-[14px]">Agent Management</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
