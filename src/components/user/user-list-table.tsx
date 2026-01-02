@@ -1,58 +1,67 @@
-"use client"
+// components/user/user-list-table.tsx
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
-import { MoreHorizontal, ShieldCheck, Mail } from "lucide-react"
+import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
 
-const users = [
-  { id: "K-0112", name: "Raden Muhamad Farhan", email: "farhan@company.com", dept: "Administrator", role: "Super Admin" },
-  { id: "K-0231", name: "Budi Santoso", email: "budi.s@company.com", dept: "Finance", role: "Agent" },
-  { id: "K-0245", name: "Siti Aminah", email: "siti.a@company.com", dept: "HRD", role: "User" },
-]
+interface User {
+  id: string;
+  full_name: string;
+  extension: string;
+  email: string;
+  department: string;
+  role: string;
+}
 
-export default function UserListTable() {
+export default function UserListTable({ users }: { users: User[] }) {
   return (
-    <Card className="rounded-xl border shadow-sm overflow-hidden">
-      <Table>
-        <TableHeader className="bg-slate-50">
-          <TableRow>
-            <TableHead className="w-[100px] font-bold">ID</TableHead>
-            <TableHead className="font-bold">USER INFO</TableHead>
-            <TableHead className="font-bold">DEPARTMENT</TableHead>
-            <TableHead className="text-center font-bold">ROLE</TableHead>
-            <TableHead className="text-right font-bold">ACTION</TableHead>
+    <Table>
+      <TableHeader className="bg-slate-50">
+        <TableRow>
+          <TableHead className="w-[100px] font-bold">ID</TableHead>
+          <TableHead className="font-bold">USER INFO</TableHead>
+          <TableHead className="font-bold text-center">DEPARTMENT</TableHead>
+          <TableHead className="font-bold text-center">ROLE</TableHead>
+          <TableHead className="text-right font-bold">ACTION</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {users.map((user) => (
+          <TableRow key={user.id} className="hover:bg-slate-50/50">
+            <TableCell className="font-medium text-primary">{user.extension}</TableCell>
+            <TableCell>
+              <div className="flex flex-col">
+                <span className="font-bold text-sm uppercase">{user.full_name}</span>
+                <span className="text-xs text-muted-foreground">{user.email}</span>
+              </div>
+            </TableCell>
+            <TableCell className="text-center">
+              <span className="text-xs font-semibold uppercase">{user.department}</span>
+            </TableCell>
+            <TableCell className="text-center">
+              <Badge 
+                variant={user.role === 'ADMIN' ? 'destructive' : 'secondary'}
+                className="text-[10px] bg-primary text-background"
+              >
+                {user.role}
+              </Badge>
+            </TableCell>
+            <TableCell className="text-right">
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((u) => (
-            <TableRow key={u.id}>
-              <TableCell className="font-mono font-bold text-primary">{u.id}</TableCell>
-              <TableCell>
-                <div className="flex flex-col">
-                  <span className="font-bold text-slate-900">{u.name}</span>
-                  <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                    <Mail className="h-2.5 w-2.5" /> {u.email}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell className="text-xs font-semibold uppercase text-slate-600">{u.dept}</TableCell>
-              <TableCell className="text-center">
-                <Badge variant={u.role === "Super Admin" ? "default" : "secondary"} className="text-[9px] font-bold text-background uppercase">
-                  {u.role === "Super Admin" && <ShieldCheck className="h-3 w-3 mr-1" />}
-                  {u.role}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-right">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </Card>
+        ))}
+      </TableBody>
+    </Table>
   )
 }

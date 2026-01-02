@@ -54,44 +54,28 @@ export default async function AdminDashboardPage() {
   if (!user) redirect("/")
 
  /* ================= PROFILE + ROLE ================= */
-const { data: profile } = await supabase
-  .from("profiles")
-  .select(`
-    full_name,
-    employee_id,
-    department,
-    user_roles (
-      roles (
-        name
-      )
-    )
-  `)
-  .eq("id", user.id)
-  .single()
+const { data: profiles, error } = await supabase
+    .from("profiles")
+    .select("full_name, extension, department, role")
+    .eq("id", user.id)
+    .single()
 
-if (!profile) redirect("/")
+  // Jika profil tidak ditemukan, redirect atau tangani error
+  if (error || !profiles) {
+    console.error("Profile not found:", error)
+    // Jangan langsung redirect jika hanya profil yang hilang agar tidak loop
+  }
 
-const role =
-  profile.user_roles?.[0]?.roles?.[0]?.name ?? null
-
-if (!role) redirect("/")
-
-/* ================= ROLE GUARD ================= */
-// 🔐 ADMIN ONLY
-if (role !== "admin") {
-  redirect(`/dashboard/${role}`)
-}
-
-  const displayName = profile.full_name ?? "Admin"
-  const displayId = profile.employee_id ?? "-"
-  const displayDepartment = profile.department ?? "-"
+  const displayName = profiles?.full_name ?? user.email?.split('@')[0]
+  const displayExt = profiles?.extension ?? "-"
+  const displayDept = profiles?.department ?? "-"
 
   return (
     <SidebarProvider>
       <AppSidebarAdmin
         userProfile={{
           full_name: displayName,
-          employee_id: displayId,
+          extension: displayExt,
         }}
       />
 
@@ -134,13 +118,13 @@ if (role !== "admin") {
 
                   <DropdownMenuItem className="flex justify-between">
                     <span>Employee ID</span>
-                    <span className="font-medium">{displayId}</span>
+                    <span className="font-medium">{displayExt}</span>
                   </DropdownMenuItem>
 
                   <DropdownMenuItem className="flex justify-between">
                     <span>Department</span>
                     <span className="font-medium text-right">
-                      {displayDepartment}
+                      {displayDept}
                     </span>
                   </DropdownMenuItem>
 

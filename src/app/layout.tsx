@@ -1,8 +1,8 @@
-import { AppSidebarAdmin } from "@/components/layout/app-sidebar-admin"
+
 import "./globals.css"
 import { Inter } from "next/font/google"
 import { Toaster } from "sonner" // [1] Import Toaster
-import { SidebarProvider } from "@/components/ui/sidebar"
+
 
 const inter = Inter({ subsets: ["latin"] })
 

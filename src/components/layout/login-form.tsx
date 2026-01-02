@@ -59,7 +59,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           window.location.href = "/dashboard"
         }, 500)
       }
-    } catch (err) {
+    } catch (error) {
       setError("An unexpected server error occurred")
       setLoading(false)
     }
@@ -69,7 +69,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     <div className={cn("flex flex-col", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <div className="flex justify-center">
+          <div className="flex items-center justify-center">
             <Image
               src="/systik.svg"
               alt="SYSTIK logo"

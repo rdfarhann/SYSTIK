@@ -2,48 +2,69 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-export async function inviteNewUser(formData: {
-  email: string,
-  full_name: string,
-  extension: string,
-  department: string,
-  role?: string
-}) {
-  // Gunakan Service Role Key untuk akses Admin
+// Definisikan Interface agar tipe data jelas
+interface InviteFormData {
+  email: string;
+  full_name: string;
+  extension: string;
+  department: string;
+  role: string;
+}
+
+export async function inviteNewUser(formData: InviteFormData) {
+  // Pastikan memanggil variabel tanpa NEXT_PUBLIC untuk Service Role
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!, 
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  )
-
-  // 1. Proses Invite via Supabase Auth
-  const { data, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
-    formData.email, 
-    {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/confirm-password`,
-      data: { 
-        full_name: formData.full_name,
-        extension: formData.extension,
-        department: formData.department
-      }
+    { 
+      auth: { 
+        autoRefreshToken: false, 
+        persistSession: false 
+      } 
     }
   )
 
-  if (inviteError) return { success: false, error: inviteError.message };
+  try {
+    // 1. Proses Invite via Auth Admin
+    const { data, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+      formData.email, 
+      {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/confirm-password`,
+        data: { 
+          full_name: formData.full_name,
+          extension: formData.extension,
+          department: formData.department,
+          role: formData.role
+        }
+      }
+    )
 
-  // 2. Simpan ke tabel Profiles
-  // Pastikan kolom 'extension' sudah ada di database (Langkah SQL di atas)
-  const { error: profileError } = await supabaseAdmin
-    .from('profiles')
-    .upsert({
-      id: data.user.id,
-      full_name: formData.full_name,
-      extension: formData.extension, 
-      department: formData.department,
-      role: formData.role || 'USER'
-    }, { onConflict: 'id' })
+    if (inviteError) throw new Error(inviteError.message)
+    if (!data?.user) throw new Error("User data not returned from Supabase")
 
-  if (profileError) return { success: false, error: "Database: " + profileError.message };
+    // 2. Simpan/Update ke tabel profiles
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .upsert({
+        id: data.user.id,
+        full_name: formData.full_name,
+        extension: formData.extension, 
+        department: formData.department,
+        role: formData.role
+      }, { onConflict: 'id' })
 
-  return { success: true };
+    if (profileError) throw new Error("Database Error: " + profileError.message)
+
+    return { success: true }
+
+  } catch (error: unknown) {
+    // Perbaikan error 'any': Cek apakah error adalah instance dari Error
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred"
+    
+    console.error("Invite User Error:", errorMessage)
+    return { 
+      success: false, 
+      error: errorMessage 
+    }
+  }
 }
