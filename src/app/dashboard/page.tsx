@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation"
+import Link from "next/link" // Gunakan Link untuk navigasi lebih cepat
 import {
   SidebarProvider,
   SidebarTrigger,
@@ -20,114 +21,110 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { ChevronDown, Bell, LogOut } from "lucide-react"
+import { ChevronDown, LogOut } from "lucide-react"
 import DashboardHero from "@/components/layout/dashboard-hero"
 import NotificationBell from "@/components/layout/notification-bell"
 
-
+// Server Action untuk Logout
 async function logout() {
   "use server"
   const supabase = await createSupabaseServer()
   await supabase.auth.signOut()
-  redirect("/")
+  redirect("/") // Sebaiknya redirect ke login
 }
 
 export default async function UserDashboardPage() {
-  /* ================= AUTH ================= */
   const supabase = await createSupabaseServer()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // 1. Cek Autentikasi
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect("/login")
 
-  if (!user) redirect("/")
-
-  /* ================= PROFILE ================= */
-  const { data: profile } = await supabase
+  // 2. Ambil Profil (Sesuaikan kolom dengan Database)
+  const { data: profiles, error } = await supabase
     .from("profiles")
-    .select(`
-      full_name,
-      employee_id,
-      department
-    `)
+    .select("full_name, extension, department, role")
     .eq("id", user.id)
     .single()
 
-  if (!profile) redirect("/")
+  // Jika profil tidak ditemukan, redirect atau tangani error
+  if (error || !profiles) {
+    console.error("Profile not found:", error)
+    // Jangan langsung redirect jika hanya profil yang hilang agar tidak loop
+  }
 
-  const displayName = profile.full_name ?? "User"
-  const displayId = profile.employee_id ?? "-"
-  const displayDepartment = profile.department ?? "-"
+  const displayName = profiles?.full_name ?? user.email?.split('@')[0]
+  const displayExt = profiles?.extension ?? "-"
+  const displayDept = profiles?.department ?? "-"
 
   return (
     <SidebarProvider>
       <AppSidebarAdmin
         userProfile={{
           full_name: displayName,
-          employee_id: displayId,
+          extension: displayExt, // Sesuai kolom DB kita
         }}
       />
 
       <main className="flex min-h-screen flex-1 flex-col overflow-x-hidden bg-slate-50/50">
-        {/* ================= HEADER WITH SHADOW ================= */}
-        {/* Menambahkan shadow-sm dan z-index agar header terlihat di atas konten */}
-       <header className="flex h-16 items-center border-b px-4 bg-background shrink-0 sticky top-0 z-10 shadow-md shadow-black/5 border-white/10">
+        <header className="flex h-16 items-center border-b px-4 bg-background shrink-0 sticky top-0 z-20 shadow-sm border-slate-200">
           <div className="flex w-full items-center justify-between">
-            {/* LEFT */}
             <div className="flex items-center gap-2">
-              {/* Menambahkan shadow-sm pada SidebarTrigger */}
-              <SidebarTrigger className="shadow-xl hover:bg-background hover:text-foreground hover:border transition-all rounded-lg" />
+              <SidebarTrigger className="text-foreground hover:bg-background hover:text-foreground hover:border transition-all rounded-lg" />
               <Separator orientation="vertical" className="h-4 mx-1" />
-
               <Breadcrumb>
                 <BreadcrumbList>
-                  <BreadcrumbItem className="text-xs sm:text-sm">
-                    <BreadcrumbLink href="/dashboard" className="font-semibold hover:text-primary transition-colors">Dashboard</BreadcrumbLink>
+                  <BreadcrumbItem>
+                    {/* Menggunakan asChild + Link agar navigasi SPA */}
+                    <BreadcrumbLink asChild>
+                      <Link href="/dashboard" className="font-semibold hover:text-primary">
+                        Dashboard
+                      </Link>
+                    </BreadcrumbLink>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
             </div>
 
-            {/* RIGHT */}
-            <div className="flex items-center gap-2">
-              <NotificationBell/>
+            <div className="flex items-center gap-3">
+              <NotificationBell />
+              
               <DropdownMenu>
-                {/* Profile Trigger dengan shadow-sm saat hover */}
-                <DropdownMenuTrigger className="group flex items-center gap-1 rounded-md px-2 py-1.5 text-[10px] sm:text-sm font-semibold uppercase border border-transparent hover:border-slate-200 hover:bg-background hover:shadow-sm outline-none transition-all">
-                  <span className="max-w-[80px] sm:max-w-none truncate">{displayName}</span>
-                  <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
-                </DropdownMenuTrigger>
+                <DropdownMenuTrigger className="group flex items-center gap-2 rounded-full pl-3 pr-2 py-1 hover:bg-slate-50 transition-all outline-none">
+                  {/* <span className="text-xs font-bold text-slate-700 uppercase">{displayName}</span> */}
+                  <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-[15px] text-white font-bold">
+                    {displayName?.substring(0, 2).toUpperCase()}
+                  </div>
+                  <ChevronDown className="h-3 w-3 text-slate-500 transition-transform group-data-[state=open]:rotate-180" />
+                </DropdownMenuTrigger>  
 
-                {/* Dropdown Content dengan shadow-lg yang kuat */}
-                <DropdownMenuContent align="end" className="w-56 text-xs shadow-lg shadow-black/10 border-slate-200 animate-in fade-in zoom-in-95">
-                  <DropdownMenuLabel className="text-[11px] text-foreground">
-                    Informasi Pengguna
+                <DropdownMenuContent align="end" className="w-60 shadow-xl border-slate-200 p-2">
+                  <DropdownMenuLabel className="px-2 py-1.5 text-xs text-slate-500 font-normal">
+                    Account Connected: <br/>
+                    <span className="font-bold text-slate-900">{user.email}</span>
                   </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  
+                  <div className="px-2 py-2 flex flex-col gap-1">
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-slate-500">Employee ID</span>
+                      <span className="font-bold text-foreground">{displayExt}</span>
+                    </div>
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-slate-500">Department</span>
+                      <span className="font-bold text-foreground">{displayDept}</span>
+                    </div>
+                  </div>
 
                   <DropdownMenuSeparator />
-
-                  <DropdownMenuItem className="flex justify-between text-foreground">
-                    <span>Employee ID</span>
-                    <span className="font-medium text-right text-foreground">{displayId}</span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem className="flex justify-between text-foreground">
-                    <span>Department</span>
-                    <span className="font-medium text-right text-foreground">
-                      {displayDepartment}
-                    </span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem className="p-0">
                     <form action={logout} className="w-full">
                       <button
                         type="submit"
-                        className="flex w-full items-center gap-2 text-red-600 font-semibold hover:text-red-700 transition-colors"
+                        className="flex w-full items-center gap-2 px-2 py-2 text-sm text-red-600 font-semibold hover:bg-red-50 rounded-md transition-colors"
                       >
                         <LogOut className="h-4 w-4" />
-                        Logout
+                        Exit
                       </button>
                     </form>
                   </DropdownMenuItem>
@@ -137,8 +134,9 @@ export default async function UserDashboardPage() {
           </div>
         </header>
 
-        <section className="flex flex-1 flex-col p-0 sm:p-6">
-          <DashboardHero/>
+        <section className="flex flex-1 flex-col p-4 sm:p-6">
+          <DashboardHero />
+          {/* Tambahkan Konten Utama Anda di Sini */}
         </section>
       </main>
     </SidebarProvider>

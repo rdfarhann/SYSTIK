@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -20,9 +19,7 @@ import {
   LayoutDashboard,
   Ticket,
   Users,
-  UserCog,
-  BarChart3,
-  Settings,
+
   ChevronRight,
   ChevronDown,
 } from "lucide-react"
@@ -30,7 +27,7 @@ import {
 interface AppSidebarAdminProps {
   userProfile?: {
     full_name?: string | null
-    employee_id?: string | null
+    extension?: string | null
   } | null
 }
 
@@ -123,7 +120,7 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <SidebarMenuButton asChild className="h-10 px-3 ">
               <Link href="/dashboard/admin/reports" className="flex items-center gap-3">
                 <BarChart3 className="h-5 w-5 shrink-0" />
@@ -139,7 +136,7 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
                 <span className="font-medium text-[14px]">Settings</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
 
         </SidebarMenu>
       </SidebarContent>

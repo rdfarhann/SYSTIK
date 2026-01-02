@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr' // Gunakan CookieOptions
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -17,8 +17,10 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          // cookiesToSet sudah memiliki tipe internal yang benar dari @supabase/ssr
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          // Sinkronisasi cookie ke request asli
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          
+          // Sinkronisasi cookie ke response agar tersimpan di browser
           response = NextResponse.next({
             request,
           })
@@ -30,15 +32,24 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Me-refresh session agar tidak kadaluarsa (Penting untuk Next.js App Router)
+  // SANGAT PENTING: Me-refresh session agar cookie terupdate sebelum pengecekan
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Logic Redirect
-  if (user && request.nextUrl.pathname.startsWith('/login')) {
+  const url = request.nextUrl.clone()
+  const isDashboardPage = url.pathname.startsWith('/dashboard')
+  const isLoginPage = url.pathname === '/login' || url.pathname === '/' // Tambahkan "/" jika login ada di root
+  
+  const isPublicAuthRoute = 
+    isLoginPage || 
+    url.pathname.startsWith('/confirm-password') || 
+    url.pathname.startsWith('/reset-password')
+
+  // Logika Redirect
+  if (user && isLoginPage) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  if (!user && isDashboardPage && !isPublicAuthRoute) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
@@ -46,5 +57,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }

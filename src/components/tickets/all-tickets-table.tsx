@@ -97,7 +97,7 @@ export default function AllTicketsTable({ statusFilter }: AllTicketsTableProps) 
         </div>
       </div>
 
-      <Card className="rounded-xl border shadow-sm overflow-hidden border-slate-200">
+      <Card>
         <Table>
           <TableHeader className="bg-slate-50">
             <TableRow>

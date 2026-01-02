@@ -46,10 +46,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       })
 
       if (authError) {
-        setError("Email atau Password Salah")
+        // Ganti sementara agar Anda tahu error aslinya apa
+        setError(authError.message) 
         setLoading(false)
         return
-      }
+    }
 
       if (data.user) {
         router.refresh()
