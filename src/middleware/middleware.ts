@@ -17,13 +17,8 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          // Sinkronisasi cookie ke request asli
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          
-          // Sinkronisasi cookie ke response agar tersimpan di browser
-          response = NextResponse.next({
-            request,
-          })
+          response = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           )
@@ -32,25 +27,48 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // SANGAT PENTING: Me-refresh session agar cookie terupdate sebelum pengecekan
   const { data: { user } } = await supabase.auth.getUser()
-
   const url = request.nextUrl.clone()
-  const isDashboardPage = url.pathname.startsWith('/dashboard')
-  const isLoginPage = url.pathname === '/login' || url.pathname === '/' // Tambahkan "/" jika login ada di root
-  
-  const isPublicAuthRoute = 
-    isLoginPage || 
-    url.pathname.startsWith('/confirm-password') || 
-    url.pathname.startsWith('/reset-password')
+  const pathname = url.pathname
 
-  // Logika Redirect
+  // Perbaikan Identifikasi Route agar tidak tumpang tindih
+  const isAdminRoute = pathname.startsWith('/dashboard/admin')
+  // Halaman user dashboard HANYA jika pathname adalah '/dashboard' tepat atau bukan mengarah ke /admin
+  const isUserDashboardOnly = pathname === '/dashboard' 
+  const isAnyDashboardRoute = pathname.startsWith('/dashboard')
+  const isLoginPage = pathname === '/login' || pathname === '/'
+
+  let userRole = null
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    userRole = profile?.role?.toLowerCase() // Pastikan lowercase untuk konsistensi
+  }
+
+  // --- LOGIKA REDIRECT YANG DIPERBAIKI ---
+
+  // 1. Jika sudah login dan mencoba akses login/root, arahkan ke rumah masing-masing
   if (user && isLoginPage) {
+    return NextResponse.redirect(new URL(userRole === 'admin' ? '/dashboard/admin' : '/dashboard', request.url))
+  }
+
+  // 2. Proteksi Dasar: Harus login untuk semua route dashboard
+  if (!user && isAnyDashboardRoute) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // 3. Proteksi Khusus Admin Route: Jika bukan admin, tendang ke dashboard user
+  if (user && isAdminRoute && userRole !== 'admin') {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  if (!user && isDashboardPage && !isPublicAuthRoute) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // 4. Proteksi Khusus User Route: Jika admin nyasar ke dashboard user biasa, arahkan ke dashboard admin
+  // Gunakan isUserDashboardOnly agar tidak terjadi loop saat mengakses /dashboard/admin
+  if (user && isUserDashboardOnly && userRole === 'admin') {
+     return NextResponse.redirect(new URL('/dashboard/admin', request.url))
   }
 
   return response

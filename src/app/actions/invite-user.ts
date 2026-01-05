@@ -50,7 +50,8 @@ export async function inviteNewUser(formData: InviteFormData) {
         full_name: formData.full_name,
         extension: formData.extension, 
         department: formData.department,
-        role: formData.role
+        role: formData.role,
+        email: formData.email // Tambahkan baris ini sesuai skema database Anda
       }, { onConflict: 'id' })
 
     if (profileError) throw new Error("Database Error: " + profileError.message)

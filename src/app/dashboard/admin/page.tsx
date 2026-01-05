@@ -1,41 +1,20 @@
+// app/dashboard/page.tsx
 import { redirect } from "next/navigation"
-
-/* ================= UI PROVIDER & SIDEBAR ================= */
-import {
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+import Link from "next/link"
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebarAdmin } from "@/components/layout/app-sidebar-admin"
-
-/* ================= UI COMPONENTS ================= */
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-} from "@/components/ui/breadcrumb"
-
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
-
-/* ================= LIB ================= */
 import { createSupabaseServer } from "@/lib/supabase/server"
-
-/* ================= ICONS ================= */
-import { ChevronDown, Bell, LogOut } from "lucide-react"
-
-/* ================= COMPONENTS ================= */
+import { ChevronDown, LogOut, AlertTriangle } from "lucide-react"
 import DashboardHero from "@/components/layout/dashboard-hero"
+import NotificationBell from "@/components/layout/notification-bell"
+import { Ticket } from "@/app/types/ticket"
 
-/* ================= LOGOUT ACTION ================= */
 async function logout() {
   "use server"
   const supabase = await createSupabaseServer()
@@ -43,32 +22,55 @@ async function logout() {
   redirect("/")
 }
 
-export default async function AdminDashboardPage() {
-  /* ================= AUTH ================= */
+export default async function UserDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>
+}) {
   const supabase = await createSupabaseServer()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
+  const { data: { user } } = await supabase.auth.getUser()
+  
   if (!user) redirect("/")
 
- /* ================= PROFILE + ROLE ================= */
-const { data: profiles, error } = await supabase
+
+  const { data: profileData } = await supabase
     .from("profiles")
-    .select("full_name, extension, department, role")
+    .select("*")
     .eq("id", user.id)
     .single()
 
-  // Jika profil tidak ditemukan, redirect atau tangani error
-  if (error || !profiles) {
-    console.error("Profile not found:", error)
-    // Jangan langsung redirect jika hanya profil yang hilang agar tidak loop
+  if (profileData?.role === "admin") {
+    redirect("/dashboard/admin")
   }
 
-  const displayName = profiles?.full_name ?? user.email?.split('@')[0]
-  const displayExt = profiles?.extension ?? "-"
-  const displayDept = profiles?.department ?? "-"
+  const { status } = await searchParams
+
+  // 2. Fetch Data dengan Filter user_id (Keamanan Berlapis)
+  const [ticketsRes] = await Promise.all([
+    supabase.from("tickets")
+      .select(`
+        *,
+        profiles!user_id (
+          full_name
+        )
+      `)
+      .eq("user_id", user.id) // <--- PENTING: User hanya melihat tiket miliknya
+      .order("created_at", { ascending: false })
+  ])
+
+  const allTickets = (ticketsRes.data as Ticket[]) || []
+  
+  const stats = {
+    total: allTickets.length,
+    open: allTickets.filter(t => t.status?.toUpperCase() === "OPEN").length,
+    inProgress: allTickets.filter(t => t.status?.toUpperCase() === "IN_PROGRESS").length, 
+    closed: allTickets.filter(t => t.status?.toUpperCase() === "CLOSED").length,
+    canceled: allTickets.filter(t => t.status?.toUpperCase() === "CANCELED").length,
+  }
+
+  const displayName = profileData?.full_name ?? user.email?.split('@')[0]
+  const displayExt = profileData?.extension ?? "-"
+  const displayDept = profileData?.department ?? "-"
 
   return (
     <SidebarProvider>
@@ -76,68 +78,71 @@ const { data: profiles, error } = await supabase
         userProfile={{
           full_name: displayName,
           extension: displayExt,
+          role: profileData?.role ?? "user" // Mengirim role ke sidebar
         }}
       />
 
-      <main className="flex min-h-screen flex-1 flex-col">
-        {/* ================= HEADER ================= */}
-        <header className="flex h-16 items-center border-b px-4">
+      <main className="flex min-h-screen flex-1 flex-col overflow-x-hidden bg-slate-50/50">
+        <header className="flex h-16 items-center border-b px-4 bg-background shrink-0 sticky top-0 z-20 shadow-sm border-slate-200">
           <div className="flex w-full items-center justify-between">
-            {/* LEFT */}
             <div className="flex items-center gap-2">
-              <SidebarTrigger />
-              <Separator orientation="vertical" className="h-4" />
-
+              <SidebarTrigger className="text-foreground hover:bg-background hover:text-foreground transition-all rounded-lg" />
+              <Separator orientation="vertical" className="h-4 mx-1" />
               <Breadcrumb>
                 <BreadcrumbList>
-                  <BreadcrumbItem className="font-semibold">
-                    <BreadcrumbLink>Admin Dashboard</BreadcrumbLink>
+                  <BreadcrumbItem className="text-xs sm:text-sm">
+                    <BreadcrumbLink asChild>
+                      <Link href="/dashboard" className="font-semibold hover:text-primary">Dashboard</Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem className="font-bold text-xs sm:text-sm">
+                    <span className="text-foreground opacity-60 capitalize">
+                      {status ? status.replace("-", " ") : "My Tickets"}
+                    </span>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
             </div>
 
-            {/* RIGHT */}
-            <div className="flex items-center gap-2">
-              <button className="relative rounded-lg p-2 hover:border">
-                <Bell className="h-5 w-5" />
-              </button>
+            <div className="flex items-center gap-3">
+              <NotificationBell/> 
 
               <DropdownMenu>
-                <DropdownMenuTrigger className="group flex items-center gap-1 rounded-md px-2 py-1 text-sm font-semibold uppercase hover:border">
-                  {displayName}
-                  <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
-                </DropdownMenuTrigger>
+                <DropdownMenuTrigger className="group flex items-center gap-2 rounded-full pl-3 pr-2 py-1 hover:bg-slate-50 transition-all outline-none">
+                  <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-[15px] text-white font-bold">
+                    {displayName?.substring(0, 2).toUpperCase()}
+                  </div>
+                  <ChevronDown className="h-3 w-3 text-slate-500 transition-transform group-data-[state=open]:rotate-180" />
+                </DropdownMenuTrigger>   
 
-                <DropdownMenuContent align="end" className="w-56 text-xs">
-                  <DropdownMenuLabel className="text-[11px]">
-                    Informasi Pengguna
+                <DropdownMenuContent align="end" className="w-60 shadow-xl border-slate-200 p-2">
+                  <DropdownMenuLabel className="px-2 py-1.5 text-xs text-slate-500 font-normal">
+                    Account Connected: <br/>
+                    <span className="font-bold text-slate-900">{user.email}</span>
                   </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  
+                  <div className="px-2 py-2 flex flex-col gap-1">
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-slate-500">Extension</span>
+                      <span className="font-bold text-foreground">{displayExt}</span>
+                    </div>
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-slate-500">Department</span>
+                      <span className="font-bold text-foreground">{displayDept}</span>
+                    </div>
+                  </div>
 
                   <DropdownMenuSeparator />
-
-                  <DropdownMenuItem className="flex justify-between">
-                    <span>Employee ID</span>
-                    <span className="font-medium">{displayExt}</span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem className="flex justify-between">
-                    <span>Department</span>
-                    <span className="font-medium text-right">
-                      {displayDept}
-                    </span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem className="p-0">
                     <form action={logout} className="w-full">
                       <button
                         type="submit"
-                        className="flex w-full items-center gap-2 text-red-600"
+                        className="flex w-full items-center gap-2 px-2 py-2 text-sm text-red-600 font-semibold hover:bg-red-50 rounded-md transition-colors"
                       >
                         <LogOut className="h-4 w-4" />
-                        Logout
+                        Exit
                       </button>
                     </form>
                   </DropdownMenuItem>
@@ -147,9 +152,29 @@ const { data: profiles, error } = await supabase
           </div>
         </header>
 
-        {/* ================= CONTENT ================= */}
-        <section className="flex flex-1 flex-col gap-6 p-6">
-          <DashboardHero />
+        <section className="flex flex-1 flex-col p-4 sm:p-6 space-y-6">
+          {/* Tampilkan pesan jika user belum memiliki tiket sama sekali */}
+          {allTickets.length === 0 && (
+            <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl flex items-center gap-3 text-blue-800">
+              <AlertTriangle className="h-5 w-5 text-blue-500" />
+              <div className="text-sm">
+                <p className="font-bold">Belum Ada Tiket</p>
+                <p>Anda belum membuat permintaan tiket. Silakan buat tiket baru untuk bantuan teknis.</p>
+              </div>
+            </div>
+          )}
+
+          {ticketsRes.error && (
+            <div className="bg-red-50 border border-red-200 p-4 rounded-2xl flex items-center gap-3 text-red-800">
+              <AlertTriangle className="h-5 w-5" />
+              <div className="text-sm">
+                <p className="font-bold">Database Error</p>
+                <p>{ticketsRes.error.message}</p>
+              </div>
+            </div>
+          )}
+
+          <DashboardHero stats={stats} tickets={allTickets} />
         </section>
       </main>
     </SidebarProvider>

@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createBrowserClient } from "@supabase/ssr" 
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,6 @@ import Image from "next/image"
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter()
   
-  // Inisialisasi Supabase Browser Client
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -40,24 +39,43 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     setError("")
 
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
+      // 1. Proses Login Utama
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (authError) {
-        // Ganti sementara agar Anda tahu error aslinya apa
         setError(authError.message) 
         setLoading(false)
         return
-    }
+      }
 
-      if (data.user) {
+      if (authData.user) {
+        // 2. Kueri Role dari tabel profiles
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", authData.user.id)
+          .single()
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError)
+          // Default redirect jika profile tidak ditemukan
+          window.location.href = "/dashboard"
+          return
+        }
+
+        // 3. Pengalihan berdasarkan Role
         router.refresh()
         
         setTimeout(() => {
-          window.location.href = "/dashboard"
-        }, 500)
+          if (profile?.role === "ADMIN") {
+            window.location.href = "/dashboard/admin"
+          } else {
+            window.location.href = "/dashboard"
+          }
+        }, 300)
       }
     } catch (error) {
       setError("An unexpected server error occurred")
@@ -88,7 +106,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           <form onSubmit={handleSubmit}>
             <FieldGroup className="flex flex-col gap-2">
               {error && (
-                <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md border border-red-200 animate-in fade-in zoom-in duration-200">
+                <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md border border-red-200">
                   {error}
                 </div>
               )}

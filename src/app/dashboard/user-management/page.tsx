@@ -28,7 +28,7 @@ async function logout() {
   "use server"
   const supabase = await createSupabaseServer()
   await supabase.auth.signOut()
-  redirect("/login")
+  redirect("/")
 }
 
 export default async function UserManagementPage() {
@@ -132,7 +132,7 @@ if (usersError) {
                         className="flex w-full items-center gap-2 px-2 py-2 text-sm text-red-600 font-semibold hover:bg-red-50 rounded-md transition-colors"
                       >
                         <LogOut className="h-4 w-4" />
-                        Exit Application
+                        Exit
                       </button>
                     </form>
                   </DropdownMenuItem>

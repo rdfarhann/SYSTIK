@@ -28,6 +28,7 @@ interface AppSidebarAdminProps {
   userProfile?: {
     full_name?: string | null
     extension?: string | null
+    role?: string | null
   } | null
 }
 
@@ -119,25 +120,6 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-
-          {/* <SidebarMenuItem>
-            <SidebarMenuButton asChild className="h-10 px-3 ">
-              <Link href="/dashboard/admin/reports" className="flex items-center gap-3">
-                <BarChart3 className="h-5 w-5 shrink-0" />
-                <span className="font-medium text-[14px]">Reports</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild className="h-10 px-3 ">
-              <Link href="/dashboard/admin/settings" className="flex items-center gap-3">
-                <Settings className="h-5 w-5 shrink-0" />
-                <span className="font-medium text-[14px]">Settings</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem> */}
-
         </SidebarMenu>
       </SidebarContent>
 

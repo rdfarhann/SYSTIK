@@ -22,52 +22,37 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle,
-  Tag
+  Tag,
+  Paperclip
 } from "lucide-react"
-
-/* ================= TYPES & INTERFACES ================= */
-interface TicketData {
-  id: string
-  title: string
-  category: string
-  priority: string
-  status: string
-  date: string
-  user: string
-  department: string
-}
+// Impor tipe Ticket yang sudah kita buat sebelumnya
+import { Ticket } from "@/app/types/ticket"
 
 interface AllTicketsDetailProps {
   statusFilter?: string
+  tickets: Ticket[] // Sekarang menerima data dari props
 }
 
-/* ================= DATA DUMMY ================= */
-const allTickets: TicketData[] = [
-  { id: "T-2401", title: "Install Ulang PC Keuangan", category: "Hardware", priority: "High", status: "Open", date: "23/12/2025", user: "Budi Santoso", department: "Finance" },
-  { id: "T-2402", title: "Lupa Password Email", category: "Account", priority: "Medium", status: "In Progress", date: "22/12/2025", user: "Siti Aminah", department: "HRD" },
-  { id: "T-2403", title: "Printer Macet Lantai 2", category: "Hardware", priority: "Low", status: "Closed", date: "21/12/2025", user: "Agus Setiawan", department: "Operations" },
-  { id: "T-2404", title: "Akses VPN Bermasalah", category: "Network", priority: "High", status: "Canceled", date: "20/12/2025", user: "Dewi Lestari", department: "IT" },
-  { id: "T-2415", title: "Ganti Toner Printer HR", category: "Hardware", priority: "Medium", status: "Open", date: "09/12/2025", user: "Farhan", department: "Administrator" },
-];
-
-export default function AllTicketsDetail({ statusFilter }: AllTicketsDetailProps) {
+export default function AllTicketsDetail({ statusFilter, tickets }: AllTicketsDetailProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 6
 
   const filteredTickets = useMemo(() => {
-    return allTickets.filter(ticket => {
+    // Menggunakan data 'tickets' dari props, bukan dummy lagi
+    return tickets.filter(ticket => {
       const matchesSearch = 
-        ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ticket.ticket_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
         ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        ticket.user.toLowerCase().includes(searchTerm.toLowerCase());
+        (ticket.profiles?.full_name || "").toLowerCase().includes(searchTerm.toLowerCase());
 
-      const normalizedStatus = ticket.status.toLowerCase().replace(/\s+/g, '-');
+      // Normalisasi status database (OPEN/IN_PROGRESS) agar cocok dengan filter URL
+      const normalizedStatus = ticket.status.toLowerCase().replace(/_/g, '-');
       const matchesStatus = !statusFilter || statusFilter === 'all' || normalizedStatus === statusFilter;
 
       return matchesSearch && matchesStatus;
     })
-  }, [searchTerm, statusFilter])
+  }, [searchTerm, statusFilter, tickets])
 
   const totalPages = Math.ceil(filteredTickets.length / itemsPerPage)
   const currentItems = filteredTickets.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
@@ -85,14 +70,6 @@ export default function AllTicketsDetail({ statusFilter }: AllTicketsDetailProps
             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
           />
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Button variant="outline" size="sm" className="rounded-xl font-bold text-xs uppercase tracking-widest h-10 px-4 flex-1 sm:flex-none">
-            <Filter className="h-4 w-4 mr-2" /> Filter
-          </Button>
-          <Button variant="outline" size="sm" className="rounded-xl font-bold text-xs uppercase tracking-widest h-10 px-4 flex-1 sm:flex-none">
-            <ArrowUpDown className="h-4 w-4 mr-2" /> Sort
-          </Button>
-        </div>
       </div>
 
       {/* Vertical List Cards */}
@@ -101,15 +78,15 @@ export default function AllTicketsDetail({ statusFilter }: AllTicketsDetailProps
           currentItems.map((ticket) => (
             <Card key={ticket.id} className="group flex flex-col sm:flex-row items-center border-slate-200 hover:border-[#00843D]/30 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300 rounded-2xl overflow-hidden border-l-4 border-l-[#00843D]">
               
-              {/* Bagian ID & Status (Kiri) */}
-              <div className="flex flex-row sm:flex-col items-center justify-center p-4 bg-slate-50/50 min-w-[120px] gap-2 border-b sm:border-b-0 sm:border-r border-slate-100 w-full sm:w-auto">
-                <span className="font-mono text-xs font-black text-[#00843D] bg-[#00843D]/10 px-2 py-1 rounded-lg">
-                  {ticket.id}
+              {/* Bagian ID & Status */}
+              <div className="flex flex-row sm:flex-col items-center justify-center p-4 bg-slate-50/50 min-w-[140px] gap-2 border-b sm:border-b-0 sm:border-r border-slate-100 w-full sm:w-auto">
+                <span className="font-mono text-[10px] font-black text-[#00843D] bg-[#00843D]/10 px-2 py-1 rounded-lg">
+                  {ticket.ticket_no}
                 </span>
                 {getStatusBadge(ticket.status)}
               </div>
 
-              {/* Bagian Detail (Tengah) */}
+              {/* Bagian Detail */}
               <div className="flex-1 p-5 space-y-2 w-full">
                 <h3 className="font-bold text-slate-800 leading-tight group-hover:text-[#00843D] transition-colors line-clamp-1">
                   {ticket.title}
@@ -117,20 +94,21 @@ export default function AllTicketsDetail({ statusFilter }: AllTicketsDetailProps
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                   <div className="flex items-center text-[11px] font-semibold text-slate-500">
                     <User className="h-3.5 w-3.5 mr-1.5 text-slate-400" />
-                    {ticket.user}
-                  </div>
-                  <div className="flex items-center text-[11px] font-semibold text-slate-500">
-                    <Building2 className="h-3.5 w-3.5 mr-1.5 text-slate-400" />
-                    {ticket.department}
+                    {ticket.profiles?.full_name || "Unknown"}
                   </div>
                   <div className="flex items-center text-[11px] font-bold text-slate-400 uppercase tracking-tight">
                     <Calendar className="h-3.5 w-3.5 mr-1.5" />
-                    {ticket.date}
+                    {new Date(ticket.created_at).toLocaleDateString('id-ID')}
                   </div>
+                  {ticket.attachment_url && (
+                    <div className="flex items-center text-[11px] font-bold text-emerald-600">
+                      <Paperclip className="h-3.5 w-3.5 mr-1" /> Attached
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Bagian Priority & Action (Kanan) */}
+              {/* Bagian Priority & Action */}
               <div className="flex items-center gap-4 px-6 py-4 sm:py-0 bg-slate-50/30 sm:bg-transparent w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0">
                 <div className="flex items-center gap-3">
                     <Badge variant="outline" className={`text-[9px] font-black uppercase ${getPriorityStyle(ticket.priority)}`}>
@@ -162,7 +140,7 @@ export default function AllTicketsDetail({ statusFilter }: AllTicketsDetailProps
           <Button 
             variant="outline" 
             size="icon" 
-            className="h-9 w-9 rounded-xl shadow-sm disabled:opacity-30" 
+            className="h-9 w-9 rounded-xl shadow-sm" 
             onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} 
             disabled={currentPage === 1}
           >
@@ -171,7 +149,7 @@ export default function AllTicketsDetail({ statusFilter }: AllTicketsDetailProps
           <Button 
             variant="outline" 
             size="icon" 
-            className="h-9 w-9 rounded-xl shadow-sm disabled:opacity-30" 
+            className="h-9 w-9 rounded-xl shadow-sm" 
             onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} 
             disabled={currentPage === totalPages || totalPages === 0}
           >
@@ -183,23 +161,25 @@ export default function AllTicketsDetail({ statusFilter }: AllTicketsDetailProps
   )
 }
 
-/* ================= HELPERS & SUB-COMPONENTS ================= */
+/* ================= HELPERS ================= */
 
 function getStatusBadge(status: string) {
   const base = "px-3 py-0.5 rounded-full font-black text-[9px] uppercase tracking-tighter border shadow-sm"
-  if (status === "Open") return <Badge className={`${base} bg-emerald-50 text-emerald-600 border-emerald-100`}>Open</Badge>
-  if (status === "In Progress") return <Badge className={`${base} bg-amber-50 text-amber-600 border-amber-100`}>In Progress</Badge>
-  if (status === "Closed") return <Badge className={`${base} bg-slate-50 text-slate-500 border-slate-100`}>Closed</Badge>
+  const s = status.toUpperCase()
+  if (s === "OPEN") return <Badge className={`${base} bg-emerald-50 text-emerald-600 border-emerald-100`}>Open</Badge>
+  if (s === "IN_PROGRESS") return <Badge className={`${base} bg-amber-50 text-amber-600 border-amber-100`}>In Progress</Badge>
+  if (s === "CLOSED") return <Badge className={`${base} bg-slate-50 text-slate-500 border-slate-100`}>Closed</Badge>
   return <Badge className={`${base} bg-rose-50 text-rose-600 border-rose-100`}>Canceled</Badge>
 }
 
 function getPriorityStyle(priority: string) {
-  if (priority === 'High') return 'border-red-100 bg-red-50 text-red-600'
-  if (priority === 'Medium') return 'border-amber-100 bg-amber-50 text-amber-600'
+  const p = priority.toUpperCase()
+  if (p === 'HIGH') return 'border-red-100 bg-red-50 text-red-600'
+  if (p === 'MEDIUM') return 'border-amber-100 bg-amber-50 text-amber-600'
   return 'border-slate-100 bg-slate-50 text-slate-500'
 }
 
-function TicketDetailModal({ ticket }: { ticket: TicketData }) {
+function TicketDetailModal({ ticket }: { ticket: Ticket }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -210,7 +190,7 @@ function TicketDetailModal({ ticket }: { ticket: TicketData }) {
       <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden border-none shadow-2xl rounded-[2rem] bg-white">
         <div className="bg-[#00843D] p-8 text-white">
           <div className="flex justify-between items-start mb-4">
-            <Badge className="bg-white/20 hover:bg-white/30 border-none text-white font-mono px-3">{ticket.id}</Badge>
+            <Badge className="bg-white/20 hover:bg-white/30 border-none text-white font-mono px-3">{ticket.ticket_no}</Badge>
             {getStatusBadge(ticket.status)}
           </div>
           <DialogTitle className="text-2xl font-black leading-tight uppercase tracking-tighter">
@@ -219,35 +199,38 @@ function TicketDetailModal({ ticket }: { ticket: TicketData }) {
         </div>
         
         <div className="p-8 space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <p className="text-[10px] font-black text-slate-400 uppercase mb-2">Requester</p>
-                <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-[#00843D]" />
-                    <span className="text-sm font-bold text-slate-700">{ticket.user}</span>
-                </div>
-            </div>
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <p className="text-[10px] font-black text-slate-400 uppercase mb-2">Department</p>
-                <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-[#00843D]" />
-                    <span className="text-sm font-bold text-slate-700">{ticket.department}</span>
-                </div>
-            </div>
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <p className="text-[10px] font-black text-slate-400 uppercase mb-2">Requester</p>
+              <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-[#00843D]" />
+                  <span className="text-sm font-bold text-slate-700">{ticket.profiles?.full_name || "Unknown"}</span>
+              </div>
           </div>
 
-          <div className="space-y-3">
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-400 font-bold uppercase text-[10px]">Priority Level</span>
-                <Badge variant="outline" className={`font-black ${getPriorityStyle(ticket.priority)}`}>{ticket.priority}</Badge>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <p className="text-[10px] font-black text-slate-400 uppercase">Description</p>
+              <p className="text-xs text-slate-600 leading-relaxed italic">&quot;{ticket.description}&quot;</p>
+            </div>
+
+            {ticket.attachment_url && (
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-slate-400 uppercase">Attachment</p>
+                <div className="rounded-xl border overflow-hidden">
+                  <img src={ticket.attachment_url} alt="Attachment" className="w-full h-32 object-cover" />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 border-t pt-4">
+             <div className="flex flex-col">
+                <span className="text-slate-400 font-bold uppercase text-[9px]">Priority Level</span>
+                <span className={`text-xs font-black uppercase ${getPriorityStyle(ticket.priority).split(' ')[2]}`}>{ticket.priority}</span>
              </div>
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-400 font-bold uppercase text-[10px]">Category</span>
-                <span className="font-bold text-slate-700">{ticket.category}</span>
-             </div>
-             <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-400 font-bold uppercase text-[10px]">Created Date</span>
-                <span className="font-bold text-slate-700">{ticket.date}</span>
+             <div className="flex flex-col">
+                <span className="text-slate-400 font-bold uppercase text-[9px]">Category</span>
+                <span className="text-xs font-black text-slate-700 uppercase">{ticket.category}</span>
              </div>
           </div>
 

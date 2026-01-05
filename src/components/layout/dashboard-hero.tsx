@@ -1,83 +1,80 @@
 "use client"
 
-import Link from "next/link" // Import Link
-import {
-  Ticket,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Loader,
-  LucideIcon,
-} from "lucide-react"
+import React from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
-import CreateTicketModal from "../tickets/create-ticket-modal"
+import { Badge } from "@/components/ui/badge"
+import { Ticket as TicketIcon, Clock, CheckCircle2, XCircle, Activity } from "lucide-react"
+import AllTicketsDetail from "@/components/tickets/all-tickets-detail"
+import { Ticket } from "@/app/types/ticket"
 import AllTicketsTable from "../tickets/all-tickets-table"
 
-export default function DashboardHero() {
-  return (
-    <div className="space-y-6 w-full max-w-full overflow-x-hidden px-1 sm:px-0">
-      {/* ================= HEADER ================= */}
-      <div className="rounded-2xl border p-4 sm:p-6 bg-background shadow-xl shadow-primary/10 border-foreground text-foreground hover:bg-primary hover:text-background ">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl border shadow-2xl shrink-0">
-              <Ticket className="h-6 w-6 sm:h-7 sm:w-7" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight truncate ">SYSTIK</h1> 
-              <p className="text-xs sm:text-sm truncate font-medium">System Ticketing & Support Internal</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-              <CreateTicketModal/>
-          </div>
-        </div>
-      </div>
-
-      {/* ================= STAT CARDS DENGAN HREF ================= */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-        <StatCard title="Total Ticket" value="128" description="All tickets" icon={Ticket} href="/dashboard/tickets" />
-        <StatCard title="Open" value="34" description="Waiting to be processed" icon={Clock} href="/dashboard/tickets?status=open" />
-        <StatCard title="In Progress" value="56" description="Being worked on" icon={Loader} spin href="/dashboard/tickets?status=in-progress" />
-        <StatCard title="Closed" value="30" description="Finished" icon={CheckCircle} href="/dashboard/tickets?status=closed" />
-        <StatCard title="Canceled" value="8" description="Failed or Canceled" icon={XCircle} href="/dashboard/tickets?status=canceled" />
-      </div>
-
-      {/* ================= TICKET LIST TABLE ================= */}
-      <div className="w-full">
-        <AllTicketsTable />
-      </div>
-    </div>
-  )
+// Definisikan tipe data stats agar tidak menggunakan 'any'
+interface DashboardStats {
+  total: number
+  open: number
+  inProgress: number
+  closed: number
+  canceled: number
 }
 
-/* ================= STAT CARD SUB-COMPONENT (Updated with href) ================= */
-function StatCard({ 
-  title, 
-  value, 
-  description, 
-  icon: Icon, 
-  spin = false,
-  href = "#" // Default href jika lupa diisi
-}: { 
-  title: string, 
-  value: string, 
-  description: string, 
-  icon: LucideIcon, 
-  spin?: boolean,
-  href?: string 
-}) {
+interface DashboardHeroProps {
+  stats: DashboardStats // Ganti 'any' dengan interface DashboardStats
+  tickets: Ticket[]
+}
+
+export default function DashboardHero({ stats, tickets }: DashboardHeroProps) {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const currentFilter = searchParams.get("status") || "all"
+
+  // Data untuk mapping card statistik
+  const statConfig = [
+    { label: "Total", val: stats.total, icon: TicketIcon, filter: "all", color: "text-slate-600", bg: "bg-slate-100" },
+    { label: "Open", val: stats.open, icon: Clock, filter: "open", color: "text-emerald-600", bg: "bg-emerald-50" },
+    { label: "In Progress", val: stats.inProgress, icon: Activity, filter: "in-progress", color: "text-amber-600", bg: "bg-amber-50" },
+    { label: "Closed", val: stats.closed, icon: CheckCircle2, filter: "closed", color: "text-blue-600", bg: "bg-blue-50" },
+    { label: "Canceled", val: stats.canceled, icon: XCircle, filter: "canceled", color: "text-red-600", bg: "bg-red-50" },
+  ]
+
   return (
-    // Membungkus Card dengan Link agar seluruh area bisa diklik
-    <Link href={href} className="block no-underline">
-      <Card className="rounded-xl p-3 sm:p-4 transition-all hover:scale-[1.03] bg-background text-foreground border-foreground shadow-md group hover:rotate-1 hover:bg-primary hover:text-background h-full cursor-pointer">
-        <div className="flex items-center justify-between gap-1">
-          <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest truncate">{title}</p>
-          <Icon className={`h-4 w-4 sm:h-5 sm:w-5 transition-transform ${spin ? "animate-spin" : ""}`} />
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {statConfig.map((s) => (
+          <Card 
+            key={s.label}
+            onClick={() => {
+              const p = new URLSearchParams(searchParams.toString());
+              if (s.filter === "all") p.delete("status"); else p.set("status", s.filter);
+              router.push(`?${p.toString()}`);
+            }}
+            className={`p-4 cursor-pointer transition-all border-b-4 ${
+              currentFilter === s.filter ? "border-primary bg-white shadow-sm" : "border-transparent bg-white/50"
+            }`}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <div className={`p-2 rounded-lg ${s.bg} ${s.color}`}>
+                <s.icon className="h-5 w-5" />
+              </div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{s.label}</p>
+              <p className="text-2xl font-black text-slate-900">{s.val}</p>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="font-black text-slate-800 uppercase tracking-tighter text-lg">
+            Ticket Management
+          </h2>
+          <Badge className="bg-primary/10 text-primary border-none font-bold uppercase text-[10px]">
+            Filter: {currentFilter}
+          </Badge>
         </div>
-        <p className="mt-2 sm:mt-3 text-xl sm:text-3xl font-extrabold tracking-tight">{value}</p>
-        <p className="mt-1 text-[9px] sm:text-[10px] italic line-clamp-1">{description}</p>
-      </Card>
-    </Link>
+        
+        <AllTicketsTable statusFilter={currentFilter} tickets={tickets} />
+      </div>
+    </div>
   )
 }
