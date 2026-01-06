@@ -30,7 +30,7 @@ async function logout() {
   "use server"
   const supabase = await createSupabaseServer()
   await supabase.auth.signOut()
-  redirect("/login") // Disarankan kembali ke login
+  redirect("/") // Disarankan kembali ke login
 }
 
 export default async function TicketsPage({
@@ -44,7 +44,7 @@ export default async function TicketsPage({
   const supabase = await createSupabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
   
-  if (!user) redirect("/login")
+  if (!user) redirect("/")
 
   // Mengambil profile dan tickets secara paralel
   const [profileRes, ticketsRes] = await Promise.all([
@@ -68,13 +68,11 @@ export default async function TicketsPage({
   // Validasi Profile
   if (profileRes.error || !profileRes.data) {
     console.error("Error fetching profile:", profileRes.error)
-    redirect("/login")
+    redirect("/")
   }
 
   const profile = profileRes.data;
   const allTickets = (ticketsRes.data as Ticket[]) || [];
-
-  /* ================= UI HELPERS ================= */
   const displayName = profile?.full_name ?? user.email?.split('@')[0]
   const displayExt = profile?.extension ?? "-"
   const displayDept = profile?.department ?? "-"

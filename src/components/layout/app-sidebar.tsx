@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -18,10 +17,7 @@ import {
 import {
   LayoutDashboard,
   Ticket,
-  Users,
-
   ChevronRight,
-  ChevronDown,
 } from "lucide-react"
 
 interface AppSidebarProps {
@@ -33,16 +29,9 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ userProfile }: AppSidebarProps) {
-  const [isTicketsOpen, setIsTicketsOpen] = useState(false)
   const pathname = usePathname()
 
-  const subMenuItems = [
-    { label: "All Tickets", href: "/dashboard/tickets" },
-    { label: "Open", href: "/dashboard/tickets?status=open" },
-    { label: "In Progress", href: "/dashboard/tickets?status=in-progress" },
-    { label: "Closed", href: "/dashboard/tickets?status=closed" },
-    { label: "Canceled", href: "/dashboard/tickets?status=canceled" },
-  ]
+
 
   return (
     <Sidebar className="w-64 bg-sidebar text-background border-r-0 shadow-xl">
@@ -79,53 +68,32 @@ export function AppSidebar({ userProfile }: AppSidebarProps) {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* TICKET MANAGEMENT (MANUAL DROP-DOWN - NO WRAP) */}
-          <SidebarMenuItem className="flex flex-col">
-            <button 
-              onClick={() => setIsTicketsOpen(!isTicketsOpen)}
-              className="flex items-center justify-between h-10 w-full px-3 rounded-md hover:bg-background hover:text-foreground transition-all group"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <Ticket className="h-5 w-5 shrink-0" />
-                <span className="font-medium text-[14px] whitespace-nowrap overflow-hidden">
-                  My Ticket
-                </span>
-              </div>
-              <ChevronDown className={`h-4 w-4 shrink-0 transition-transform duration-300 ${isTicketsOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {/* SUB-MENU CONTAINER */}
-            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isTicketsOpen ? 'max-h-60 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
-              <div className="ml-5 border-l-2 border-white/10 flex flex-col gap-0.5">
-                {subMenuItems.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className="flex h-9 items-center gap-2 pl-4 pr-2 text-[14px] text-white/70 hover:text-foreground hover:bg-white rounded-r-md transition-colors whitespace-nowrap"
-                  >
-                    <ChevronRight className="h-3 w-3 opacity-40 shrink-0" />
-                    {item.label}
+          <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-10 px-3 active:scale-[0.98] transition-all">
+                  <Link href="/dashboard/my-ticket" className="flex items-center gap-3 w-full">
+                    <Ticket className="h-8 w-8 shrink-0" />
+                    <span className="font-medium text-[14px]">My Tickets</span>
                   </Link>
-                ))}
-              </div>
-            </div>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarContent>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarContent>
 
       {/* ================= FOOTER ================= */}
       <SidebarFooter className="border-t border-white/10 px-4 py-4 bg-black/10">
         <div className="flex flex-col gap-1.5">
-          <p className="text-[15px] uppercase tracking-widest opacity-40 font-bold">Logged In As</p>
+          <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold">Logged In As</p>
           <div className="flex items-center gap-3">
-             <div className="h-12 w-12 rounded-full bg-white/15 flex items-center justify-center text-[11px] font-bold shadow-inner shrink-0 border border-white/5">
-               {userProfile?.full_name?.substring(0,2).toUpperCase() ?? "AD"}
+             <div className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center text-[11px] font-bold shadow-inner shrink-0 border border-white/5">
+               {userProfile?.full_name?.substring(0,2).toUpperCase() ?? "US"}
              </div>
              <div className="min-w-0">
-                <p className="font-semibold text-[15px] truncate drop-shadow-sm leading-none mb-1">
-                  {userProfile?.full_name ?? "USER"}
+                <p className="font-semibold text-[14px] truncate drop-shadow-sm leading-none mb-1">
+                  {userProfile?.full_name ?? "User"}
                 </p>
-                <p className="text-[12px] opacity-50 truncate leading-none italic">User</p>
+                <p className="text-[11px] opacity-50 truncate leading-none italic">
+                  Ext: {userProfile?.extension ?? "-"}
+                </p>
              </div>
           </div>
         </div>

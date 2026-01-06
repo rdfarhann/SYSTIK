@@ -133,7 +133,7 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
              </div>
              <div className="min-w-0">
                 <p className="font-semibold text-[13px] truncate drop-shadow-sm leading-none mb-1">
-                  {userProfile?.full_name ?? "Admin"}
+                  {userProfile?.full_name ?? "ADMIN"}
                 </p>
                 <p className="text-[10px] opacity-50 truncate leading-none italic">Administrator</p>
              </div>

@@ -30,7 +30,7 @@ export default function ResetPasswordPage() {
     if (error) {
       setError(error.message)
     } else {
-      router.replace("/login")
+      router.replace("/")
     }
   }
 

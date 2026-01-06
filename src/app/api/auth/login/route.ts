@@ -33,7 +33,7 @@ export async function POST(req: Request) {
   }
 
   // 3. Tentukan tujuan redirect
-  const redirectTo = profile.role === "admin" ? "/dashboard/admin" : "/dashboard"
+  const redirectTo = profile.role === "ADMIN" ? "/dashboard/admin" : "/dashboard"
 
   return NextResponse.json({
     success: true,

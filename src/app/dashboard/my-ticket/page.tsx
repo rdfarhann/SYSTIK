@@ -1,7 +1,16 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import { createSupabaseServer } from "@/lib/supabase/server"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/layout/app-sidebar"
+import NotificationBell from "@/components/layout/notification-bell"
+import { Separator } from "@/components/ui/separator"
+import { 
+  Breadcrumb, 
+  BreadcrumbItem, 
+  BreadcrumbLink, 
+  BreadcrumbList, 
+} from "@/components/ui/breadcrumb"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,18 +19,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import { createSupabaseServer } from "@/lib/supabase/server"
-import { ChevronDown, ChevronRight, LogOut, AlertTriangle, ShieldCheck } from "lucide-react"
-import DashboardHero from "@/components/layout/dashboard-hero"
-import NotificationBell from "@/components/layout/notification-bell"
-import { Ticket } from "../types/ticket"
+import { Ticket } from "@/app/types/ticket"
+import { ChevronDown, LogOut, Clock, MessageCircle, AlertCircle  } from "lucide-react"
 
 async function logout() {
   "use server"
@@ -30,14 +29,10 @@ async function logout() {
   redirect("/")
 }
 
-export default async function UserDashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ status?: string }>
-}) {
+export default async function MyTicketsPage() {
   const supabase = await createSupabaseServer()
-
   const { data: { user } } = await supabase.auth.getUser()
+  
   if (!user) redirect("/")
 
   const { data: profileData } = await supabase
@@ -46,18 +41,13 @@ export default async function UserDashboardPage({
     .eq("id", user.id)
     .single()
 
-  if (profileData?.role === "ADMIN") {
-    redirect("/dashboard/admin")
-  }
-
-  const { data: ticketsData, error: ticketsError } = await supabase
+  const { data: tickets, error: ticketsError } = await supabase
     .from("tickets")
     .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(5)
 
-  const recentTickets = (ticketsData as Ticket[]) || []
+  const allTickets = (tickets as Ticket[]) || []
   const displayName = profileData?.full_name ?? user.email?.split('@')[0]
   const displayExt = profileData?.extension ?? "-"
   const displayDept = profileData?.department ?? "-"
@@ -67,14 +57,13 @@ export default async function UserDashboardPage({
     <SidebarProvider>
       <AppSidebar
         userProfile={{
-          full_name: displayName,
-          extension: profileData?.extension ?? "-",
-          role: profileData?.role ?? "USER"
+          full_name: profileData?.full_name,
+          extension: profileData?.extension,
+          role: profileData?.role ?? "user"
         }}
       />
 
-      <main className="flex min-h-screen flex-1 flex-col overflow-x-hidden bg-slate-50/50">
-        {/* Header dengan Dropdown Logout */}
+      <main className="flex min-h-screen flex-1 flex-col bg-slate-50/50">
         <header className="flex h-16 items-center border-b px-4 bg-background shrink-0 sticky top-0 z-20 shadow-sm border-slate-200">
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center gap-2">
@@ -141,57 +130,91 @@ export default async function UserDashboardPage({
           </div>
         </header>
 
-        {/* KONTEN UTAMA */}
-        <section className="flex flex-1 flex-col p-4 sm:p-8 space-y-8 max-w-5xl mx-auto w-full">
-          <DashboardHero userName={displayName} />
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">Your Latest Ticket</h2>
-              <Link href="/dashboard/my-ticket" className="text-xs font-semibold text-emerald-600 hover:underline">
-                Lihat Semua
+        <div className="p-4 sm:p-6 space-y-6">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold tracking-tight">My Ticket History</h1>
+            <p className="text-muted-foreground text-sm">Monitor the progress of your technical assistance.</p>
+          </div>
+
+          {ticketsError && (
+             <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700">
+                <AlertCircle className="h-5 w-5" />
+                <p className="text-sm font-medium">Gagal memuat data: {ticketsError.message}</p>
+             </div>
+          )}
+
+          {allTickets.length === 0 && !ticketsError ? (
+            <div className="flex flex-col items-center justify-center p-12 bg-white rounded-3xl border border-dashed border-slate-300 text-center shadow-sm">
+              <Clock className="h-12 w-12 text-slate-300 mb-4" />
+              <h3 className="font-bold text-lg text-slate-900">Belum ada tiket</h3>
+              <p className="text-slate-500 max-w-xs mx-auto text-sm mt-1">
+                Anda belum memiliki permintaan bantuan teknis.
+              </p>
+              <Link href="/dashboard/tickets/new" className="mt-6 px-6 py-2.5 bg-primary text-white rounded-full text-sm font-bold hover:bg-primary/90 transition-colors">
+                Buat Tiket Baru
               </Link>
             </div>
-
-            {ticketsError ? (
-              <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" /> Gagal memuat data tiket.
-              </div>
-            ) : recentTickets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-12 bg-white rounded-3xl border border-dashed border-slate-200 text-center">
-                <ShieldCheck className="h-10 w-10 text-slate-200 mb-3" />
-                <p className="text-sm text-slate-400 font-medium">Belum ada aktivitas tiket saat ini.</p>
-              </div>
-            ) : (
-              <div className="grid gap-3">
-                {recentTickets.map((ticket) => (
-                  <Link
-                    key={ticket.id}
-                    href={`/dashboard/my-ticket/${ticket.id}`}
-                    className="group bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between hover:border-emerald-500/50 hover:shadow-md transition-all"
-                  >
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className={`h-2 w-2 rounded-full shrink-0 ${ticket.status?.toUpperCase() === 'OPEN' ? 'bg-blue-500' :
-                          ticket.status?.toUpperCase() === 'IN_PROGRESS' ? 'bg-amber-500' :
-                            'bg-emerald-500'
-                        }`} />
-                      <div className="min-w-0">
-                        <p className="font-bold text-sm text-slate-900 truncate group-hover:text-emerald-600 transition-colors">
-                          {ticket.title}
-                        </p>
-                        <p className="text-[11px] text-slate-400 uppercase font-medium">
-                          Status: {ticket.status?.replace("_", " ")} • {new Date(ticket.created_at).toLocaleDateString('id-ID')}
-                        </p>
-                      </div>
+          ) : (
+            <div className="grid gap-4">
+              {allTickets.map((ticket) => (
+                <div key={ticket.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+                        #{ticket.id.toString().slice(0, 8)}
+                      </span>
+                      <h3 className="font-bold text-slate-900 leading-tight">
+                        {ticket.title || "No Title"}
+                      </h3>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
+                    <StatusBadge status={ticket.status} />
+                  </div>
+                  
+                  <p className="text-sm text-slate-600 line-clamp-2 mb-4 italic">
+                    {"\""}{ticket.description}{"\""}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                    <div className="flex items-center gap-2 text-slate-400">
+                        <MessageCircle className="h-4 w-4" />
+                        <span className="text-xs">
+                          {new Date(ticket.created_at).toLocaleDateString('id-ID', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                          })}
+                        </span>
+                    </div>
+                    <Link 
+                      href={`/dashboard/my-ticket/${ticket.id}`}
+                      className="text-xs font-bold text-primary hover:text-primary/80"
+                    >
+                      Progress Details →
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
     </SidebarProvider>
+  )
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const s = status?.toUpperCase() || "UNKNOWN"
+  const styles: Record<string, string> = {
+    OPEN: "bg-blue-50 text-blue-700 border-blue-100",
+    IN_PROGRESS: "bg-amber-50 text-amber-700 border-amber-100",
+    CLOSED: "bg-emerald-50 text-emerald-700 border-emerald-100",
+    CANCELED: "bg-slate-100 text-slate-600 border-slate-200",
+  }
+
+  return (
+    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${styles[s] || "bg-slate-50 text-slate-500"}`}>
+      {s.replace("_", " ")}
+    </span>
   )
 }

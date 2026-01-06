@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
@@ -10,7 +9,7 @@ import {
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { ChevronDown, LogOut, AlertTriangle } from "lucide-react"
+import { ChevronDown, LogOut, AlertTriangle, ShieldCheck } from "lucide-react"
 import DashboardHero from "@/components/layout/dashboard-hero"
 import NotificationBell from "@/components/layout/notification-bell"
 import { Ticket } from "@/app/types/ticket"
@@ -32,34 +31,37 @@ export default async function UserDashboardPage({
   
   if (!user) redirect("/")
 
-
+  // 1. Ambil data profil untuk cek role
   const { data: profileData } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single()
 
-  if (profileData?.role === "admin") {
-    redirect("/dashboard/admin")
+  const { status } = await searchParams
+  const isAdmin = profileData?.role === "ADMIN"
+
+  // 2. Kueri Dinamis
+  // Inisialisasi kueri dasar
+  let query = supabase
+    .from("tickets")
+    .select(`
+      *,
+      profiles!user_id (
+        full_name
+      )
+    `)
+
+  // LOGIKA UTAMA: Jika BUKAN admin, filter berdasarkan user_id
+  if (!isAdmin) {
+    query = query.eq("user_id", user.id)
   }
 
-  const { status } = await searchParams
+  const { data: ticketsData, error: ticketsError } = await query.order("created_at", { ascending: false })
 
-  // 2. Fetch Data dengan Filter user_id (Keamanan Berlapis)
-  const [ticketsRes] = await Promise.all([
-    supabase.from("tickets")
-      .select(`
-        *,
-        profiles!user_id (
-          full_name
-        )
-      `)
-      .eq("user_id", user.id) // <--- PENTING: User hanya melihat tiket miliknya
-      .order("created_at", { ascending: false })
-  ])
-
-  const allTickets = (ticketsRes.data as Ticket[]) || []
+  const allTickets = (ticketsData as Ticket[]) || []
   
+  // 3. Kalkulasi Stats (Otomatis menyesuaikan data yang ditarik)
   const stats = {
     total: allTickets.length,
     open: allTickets.filter(t => t.status?.toUpperCase() === "OPEN").length,
@@ -78,7 +80,7 @@ export default async function UserDashboardPage({
         userProfile={{
           full_name: displayName,
           extension: displayExt,
-          role: profileData?.role ?? "user" // Mengirim role ke sidebar
+          role: profileData?.role ?? "USER" 
         }}
       />
 
@@ -98,7 +100,7 @@ export default async function UserDashboardPage({
                   <BreadcrumbSeparator />
                   <BreadcrumbItem className="font-bold text-xs sm:text-sm">
                     <span className="text-foreground opacity-60 capitalize">
-                      {status ? status.replace("-", " ") : "My Tickets"}
+                      {isAdmin ? "All Department Tickets" : (status ? status.replace("-", " ") : "My Tickets")}
                     </span>
                   </BreadcrumbItem>
                 </BreadcrumbList>
@@ -122,7 +124,6 @@ export default async function UserDashboardPage({
                     <span className="font-bold text-slate-900">{user.email}</span>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  
                   <div className="px-2 py-2 flex flex-col gap-1">
                     <div className="flex justify-between text-[11px]">
                       <span className="text-slate-500">Extension</span>
@@ -132,8 +133,13 @@ export default async function UserDashboardPage({
                       <span className="text-slate-500">Department</span>
                       <span className="font-bold text-foreground">{displayDept}</span>
                     </div>
+                    {isAdmin && (
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-slate-500">Access Level</span>
+                        <span className="font-bold text-primary">Administrator</span>
+                      </div>
+                    )}
                   </div>
-
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="p-0">
                     <form action={logout} className="w-full">
@@ -153,28 +159,38 @@ export default async function UserDashboardPage({
         </header>
 
         <section className="flex flex-1 flex-col p-4 sm:p-6 space-y-6">
-          {/* Tampilkan pesan jika user belum memiliki tiket sama sekali */}
-          {allTickets.length === 0 && (
-            <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl flex items-center gap-3 text-blue-800">
-              <AlertTriangle className="h-5 w-5 text-blue-500" />
+          {/* Indikator Mode Admin */}
+          {isAdmin && (
+            <div className="bg-primary/5 border border-primary/20 p-4 rounded-2xl flex items-center gap-3 text-primary">
+              <ShieldCheck className="h-5 w-5" />
               <div className="text-sm">
-                <p className="font-bold">Belum Ada Tiket</p>
-                <p>Anda belum membuat permintaan tiket. Silakan buat tiket baru untuk bantuan teknis.</p>
+                <p className="font-bold uppercase tracking-tight">Admin View Enabled</p>
+                <p className="opacity-80">You are currently viewing all tickets from all users.</p>
               </div>
             </div>
           )}
 
-          {ticketsRes.error && (
+          {allTickets.length === 0 && !ticketsError && (
+            <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl flex items-center gap-3 text-blue-800">
+              <AlertTriangle className="h-5 w-5 text-blue-500" />
+              <div className="text-sm">
+                <p className="font-bold">No Data Found</p>
+                <p>{isAdmin ? "There are no tickets in the entire system yet." : "You haven't created any technical support requests yet."}</p>
+              </div>
+            </div>
+          )}
+
+          {ticketsError && (
             <div className="bg-red-50 border border-red-200 p-4 rounded-2xl flex items-center gap-3 text-red-800">
               <AlertTriangle className="h-5 w-5" />
               <div className="text-sm">
                 <p className="font-bold">Database Error</p>
-                <p>{ticketsRes.error.message}</p>
+                <p>{ticketsError.message}</p>
               </div>
             </div>
           )}
 
-          <DashboardHero stats={stats} tickets={allTickets} />
+          <DashboardHero userName={displayName} />
         </section>
       </main>
     </SidebarProvider>

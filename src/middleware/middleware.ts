@@ -52,23 +52,23 @@ export async function middleware(request: NextRequest) {
 
   // 1. Jika sudah login dan mencoba akses login/root, arahkan ke rumah masing-masing
   if (user && isLoginPage) {
-    return NextResponse.redirect(new URL(userRole === 'admin' ? '/dashboard/admin' : '/dashboard', request.url))
+    return NextResponse.redirect(new URL(userRole === 'ADMIN' ? '/dashboard/admin' : '/dashboard', request.url))
   }
 
   // 2. Proteksi Dasar: Harus login untuk semua route dashboard
   if (!user && isAnyDashboardRoute) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   // 3. Proteksi Khusus Admin Route: Jika bukan admin, tendang ke dashboard user
-  if (user && isAdminRoute && userRole !== 'admin') {
+  if (user && isAdminRoute && userRole !== 'ADMIN') {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // 4. Proteksi Khusus User Route: Jika admin nyasar ke dashboard user biasa, arahkan ke dashboard admin
-  // Gunakan isUserDashboardOnly agar tidak terjadi loop saat mengakses /dashboard/admin
-  if (user && isUserDashboardOnly && userRole === 'admin') {
-     return NextResponse.redirect(new URL('/dashboard/admin', request.url))
+  // 4. Proteksi Khusus User Route: Jika ADMIN nyasar ke dashboard user biasa, arahkan ke dashboard ADMIN
+  // Gunakan isUserDashboardOnly agar tidak terjadi loop saat mengakses /dashboard/ADMIN
+  if (user && isUserDashboardOnly && userRole === 'ADMIN') {
+     return NextResponse.redirect(new URL('/dashboard/ADMIN', request.url))
   }
 
   return response
