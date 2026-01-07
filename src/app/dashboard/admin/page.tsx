@@ -31,7 +31,6 @@ export default async function UserDashboardPage({
   
   if (!user) redirect("/")
 
-  // 1. Ambil data profil untuk cek role
   const { data: profileData } = await supabase
     .from("profiles")
     .select("*")
@@ -41,8 +40,6 @@ export default async function UserDashboardPage({
   const { status } = await searchParams
   const isAdmin = profileData?.role === "ADMIN"
 
-  // 2. Kueri Dinamis
-  // Inisialisasi kueri dasar
   let query = supabase
     .from("tickets")
     .select(`
@@ -52,7 +49,6 @@ export default async function UserDashboardPage({
       )
     `)
 
-  // LOGIKA UTAMA: Jika BUKAN admin, filter berdasarkan user_id
   if (!isAdmin) {
     query = query.eq("user_id", user.id)
   }
@@ -61,7 +57,6 @@ export default async function UserDashboardPage({
 
   const allTickets = (ticketsData as Ticket[]) || []
   
-  // 3. Kalkulasi Stats (Otomatis menyesuaikan data yang ditarik)
   const stats = {
     total: allTickets.length,
     open: allTickets.filter(t => t.status?.toUpperCase() === "OPEN").length,
@@ -98,11 +93,6 @@ export default async function UserDashboardPage({
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
-                  <BreadcrumbItem className="font-bold text-xs sm:text-sm">
-                    <span className="text-foreground opacity-60 capitalize">
-                      {isAdmin ? "All Department Tickets" : (status ? status.replace("-", " ") : "My Tickets")}
-                    </span>
-                  </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
             </div>
@@ -189,8 +179,6 @@ export default async function UserDashboardPage({
               </div>
             </div>
           )}
-
-          <DashboardHero userName={displayName} />
         </section>
       </main>
     </SidebarProvider>

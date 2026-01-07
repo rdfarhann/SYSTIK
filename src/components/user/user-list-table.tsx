@@ -35,7 +35,7 @@ export default function UserListTable({ users }: { users: User[] }) {
       </TableHeader>
       <TableBody>
         {users.map((user) => (
-          <TableRow key={user.id} className="hover:bg-slate-50/50">
+          <TableRow key={user.id} className="hover:bg-slate-100">
             <TableCell className="font-medium text-primary">{user.extension}</TableCell>
             <TableCell>
               <div className="flex flex-col">
@@ -54,9 +54,9 @@ export default function UserListTable({ users }: { users: User[] }) {
                 {user.role}
               </Badge>
             </TableCell>
-            <TableCell className="text-right">
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="h-4 w-4" />
+            <TableCell className="text-right ">
+              <Button variant="ghost" size="icon" className="bg-background hover:bg-primary">
+                <MoreHorizontal className="h-4 w-4 \\" />
               </Button>
             </TableCell>
           </TableRow>

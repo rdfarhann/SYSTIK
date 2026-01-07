@@ -104,7 +104,7 @@ export default function AllTicketsTable({ statusFilter, tickets }: AllTicketsTab
               </TableRow>
             )) : (
               <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center text-slate-400 font-medium">Tidak ada tiket ditemukan.</TableCell>
+                <TableCell colSpan={4} className="h-32 text-center text-slate-400 font-medium">No tickets found.</TableCell>
               </TableRow>
             )}
           </TableBody>

@@ -23,7 +23,7 @@ export default function NotificationBell() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="relative rounded-lg p-2 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition-all outline-none">
-          <Bell className="h-7 w-7 text-slate-600" />
+          <Bell className="h-6 w-6 text-slate-600" />
           {unreadCount > 0 && (
             <span className="absolute top-1.5 right-1.5 h-4 w-4 rounded-full bg-red-500 border-2 border-white text-[10px] font-bold text-white flex items-center justify-center">
               {unreadCount}

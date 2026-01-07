@@ -186,7 +186,6 @@ export default async function TicketsPage({
           )}
 
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-            {/* Mengirim data allTickets asli, bukan array kosong */}
             <AllTicketsDetail 
               key={status || "all"} 
               statusFilter={status} 

@@ -74,7 +74,6 @@ export default async function UserDashboardPage({
       />
 
       <main className="flex min-h-screen flex-1 flex-col overflow-x-hidden bg-slate-50/50">
-        {/* Header dengan Dropdown Logout */}
         <header className="flex h-16 items-center border-b px-4 bg-background shrink-0 sticky top-0 z-20 shadow-sm border-slate-200">
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center gap-2">
@@ -141,7 +140,6 @@ export default async function UserDashboardPage({
           </div>
         </header>
 
-        {/* KONTEN UTAMA */}
         <section className="flex flex-1 flex-col p-4 sm:p-8 space-y-8 max-w-5xl mx-auto w-full">
           <DashboardHero userName={displayName} />
 
@@ -149,7 +147,7 @@ export default async function UserDashboardPage({
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-900 tracking-tight">Your Latest Ticket</h2>
               <Link href="/dashboard/my-ticket" className="text-xs font-semibold text-emerald-600 hover:underline">
-                Lihat Semua
+                See All
               </Link>
             </div>
 
@@ -160,7 +158,7 @@ export default async function UserDashboardPage({
             ) : recentTickets.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-12 bg-white rounded-3xl border border-dashed border-slate-200 text-center">
                 <ShieldCheck className="h-10 w-10 text-slate-200 mb-3" />
-                <p className="text-sm text-slate-400 font-medium">Belum ada aktivitas tiket saat ini.</p>
+                <p className="text-sm text-slate-400 font-medium">There is no ticket activity at this time.</p>
               </div>
             ) : (
               <div className="grid gap-3">

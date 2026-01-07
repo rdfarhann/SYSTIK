@@ -11,6 +11,7 @@ export interface Ticket {
   created_at: string;
   closed_at?: string | null; // Ada di skema gambar
   attachment_url?: string | null; 
+  phone_number?: string
   
   profiles?: {
     full_name: string | null;

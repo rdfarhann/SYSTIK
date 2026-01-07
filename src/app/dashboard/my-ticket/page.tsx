@@ -147,12 +147,12 @@ export default async function MyTicketsPage() {
           {allTickets.length === 0 && !ticketsError ? (
             <div className="flex flex-col items-center justify-center p-12 bg-white rounded-3xl border border-dashed border-slate-300 text-center shadow-sm">
               <Clock className="h-12 w-12 text-slate-300 mb-4" />
-              <h3 className="font-bold text-lg text-slate-900">Belum ada tiket</h3>
+              <h3 className="font-bold text-lg text-slate-900">No tickets yet</h3>
               <p className="text-slate-500 max-w-xs mx-auto text-sm mt-1">
-                Anda belum memiliki permintaan bantuan teknis.
+                You do not have any technical support requests.
               </p>
-              <Link href="/dashboard/tickets/new" className="mt-6 px-6 py-2.5 bg-primary text-white rounded-full text-sm font-bold hover:bg-primary/90 transition-colors">
-                Buat Tiket Baru
+              <Link href="/dashboard/my-ticket/new" className="mt-6 px-6 py-2.5 bg-primary text-white rounded-full text-sm font-bold hover:bg-primary/90 transition-colors">
+                Create New Ticket
               </Link>
             </div>
           ) : (

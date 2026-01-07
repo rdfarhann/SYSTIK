@@ -8,6 +8,7 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbSeparator
 } from "@/components/ui/breadcrumb"
 import {
   DropdownMenu,
@@ -88,19 +89,23 @@ if (usersError) {
                 <BreadcrumbList>
                   <BreadcrumbItem>
                     <BreadcrumbLink asChild>
-                      <Link href="/dashboard" className="font-semibold hover:text-primary">Dashboard</Link>
+                      <Link href="/dashboard" className="font-semibold hover:text-primary transition-colors">Dashboard</Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
+                  <BreadcrumbSeparator/>
+                    <BreadcrumbLink asChild>
+                      <span className="text-foreground opacity-60 capitalize font-bold">User Management</span>
+                    </BreadcrumbLink>
                 </BreadcrumbList>
               </Breadcrumb>
             </div>
 
             <div className="flex items-center gap-3">
-              <NotificationBell />
+              <NotificationBell/>
               
               <DropdownMenu>
                 <DropdownMenuTrigger className="group flex items-center gap-2 rounded-full pl-3 pr-2 py-1 hover:bg-slate-50 transition-all outline-none">
-                  <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-[15px] text-white font-bold">
+                  <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center text-[15px] text-white font-bold">
                     {displayName?.substring(0, 2).toUpperCase()}
                   </div>
                   <ChevronDown className="h-3 w-3 text-slate-500 transition-transform group-data-[state=open]:rotate-180" />
