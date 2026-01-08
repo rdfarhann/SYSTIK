@@ -21,20 +21,20 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { UserPlus, Loader2 } from "lucide-react"
-import { inviteNewUser } from "@/app/actions/invite-user" // Pastikan Server Action ini sudah diupdate kolomnya
+import { inviteNewUser } from "@/app/actions/invite-user" 
 import { toast } from "sonner"
 
 export function AddUserDialog() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Modifikasi: Menggunakan extension & menambahkan role
+ 
   const [formData, setFormData] = useState({
     full_name: "",
-    extension: "", // Berubah dari employee_id
+    extension: "", 
     email: "",
     department: "",
-    role: "USER" // Default role
+    role: "USER" 
   })
 
   const handleAddUser = async (e: React.FormEvent) => {
@@ -58,7 +58,8 @@ export function AddUserDialog() {
         toast.error(`Gagal: ${result.error}`)
       }
     } catch (error) {
-      toast.error("Terjadi kesalahan sistem")
+      console.error(error) 
+      toast.error("Gagal menghubungi server. Periksa koneksi atau role admin.")
     } finally {
       setLoading(false)
     }
@@ -67,7 +68,7 @@ export function AddUserDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="font-bold gap-2 rounded-xl shadow-lg bg-[#00843D] hover:bg-[#006830] transition-all active:scale-95">
+        <Button className="font-bold gap-2 rounded-xl shadow-lg bg-primary hover:bg-[#006830] transition-all active:scale-95">
           <UserPlus className="h-4 w-4" />
           ADD NEW ACCOUNT
         </Button>
@@ -76,12 +77,11 @@ export function AddUserDialog() {
         <DialogHeader>
           <DialogTitle className="font-black uppercase tracking-tight text-xl">Create New User</DialogTitle>
           <DialogDescription>
-            Input data karyawan untuk akses sistem SYSTIK.
+            Input employee data to access the SYSTIK system.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleAddUser} className="space-y-4 py-2">
-          {/* Full Name */}
           <div className="space-y-1">
             <Label htmlFor="name" className="text-xs font-bold uppercase text-slate-500">Full Name</Label>
             <Input 
@@ -93,21 +93,17 @@ export function AddUserDialog() {
               className="rounded-lg"
             />
           </div>
-
-          {/* Extension / ID Number */}
           <div className="space-y-1">
             <Label htmlFor="ext" className="text-xs font-bold uppercase text-slate-500">Extension / Ext Number</Label>
             <Input 
               id="ext" 
-              placeholder="E.g. PK-2110" 
+              placeholder="E.g. 4321" 
               required 
               value={formData.extension}
               onChange={(e) => setFormData({...formData, extension: e.target.value})}
               className="rounded-lg"
             />
           </div>
-
-          {/* Email */}
           <div className="space-y-1">
             <Label htmlFor="email" className="text-xs font-bold uppercase text-slate-500">Email Address</Label>
             <Input 
@@ -120,14 +116,12 @@ export function AddUserDialog() {
               className="rounded-lg"
             />
           </div>
-
-          {/* Department & Role (Grid Layout) */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label htmlFor="dept" className="text-xs font-bold uppercase text-slate-500">Department</Label>
               <Input 
                 id="dept" 
-                placeholder="IT / GA / HR" 
+                placeholder="E.g. Keuangan" 
                 required 
                 value={formData.department}
                 onChange={(e) => setFormData({...formData, department: e.target.value})}
@@ -144,9 +138,9 @@ export function AddUserDialog() {
                   <SelectValue placeholder="Select Role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="USER">USER</SelectItem>
-                  <SelectItem value="ADMIN">ADMIN</SelectItem>
-                  <SelectItem value="AGENT">AGENT</SelectItem>
+                  <SelectItem value="USER">User</SelectItem>
+                  <SelectItem value="ADMIN">Admin</SelectItem>
+                  <SelectItem value="AGENT">Agent</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -68,7 +68,7 @@ export default async function DashboardLayout({
           <div className="flex w-full items-center justify-between">
             
             <div className="flex items-center gap-2">
-              <SidebarTrigger />
+              <SidebarTrigger className="bg-background text-foreground hover:bg-slate-100 border hover:text-foreground border-transparent hover:border-slate-200 transition-all outline-none"/>
               <Separator orientation="vertical" className="h-4 mx-1" />
               <DynamicBreadcrumb />
             </div>
@@ -77,7 +77,7 @@ export default async function DashboardLayout({
               <NotificationBell />
               
               <DropdownMenu>
-                <DropdownMenuTrigger className="group flex items-center gap-2 rounded-full pl-3 pr-2 py-1 hover:bg-slate-50 transition-all outline-none">
+                <DropdownMenuTrigger className="group flex items-center gap-2 rounded-full pl-3 pr-2 py-1 over:bg-slate-100 border hover:text-foreground border-transparent hover:border-slate-200 transition-all outline-none">
                   <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-[13px] text-white font-bold">
                     {displayName?.substring(0, 2).toUpperCase()}
                   </div>

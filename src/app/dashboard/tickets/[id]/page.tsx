@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import StatusEditor from "@/components/tickets/status-editor"
 
 // 1. Definisikan Interface untuk Log Tiket agar tidak menggunakan 'any'
 interface TicketLog {
@@ -25,26 +26,30 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/")
 
+  // MODIFIKASI ADMIN: Menghapus filter .eq("user_id", user.id) agar admin bisa melihat semua tiket
   const { data: ticket, error } = await supabase
     .from("tickets")
     .select(`
       *,
-      ticket_logs (*) 
+      ticket_logs (*),
+      profiles!user_id (full_name)
     `)
     .eq("id", id)
-    .eq("user_id", user.id)
     .single()
 
   if (error || !ticket) notFound()
 
+  // 2. Gunakan tipe data TicketLog[] menggantikan any
   const logs: TicketLog[] = (ticket.ticket_logs || []).sort((a: TicketLog, b: TicketLog) => 
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )
+  
 
   const getStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
       case "OPEN": return "bg-blue-100 text-blue-700 border-blue-200"
       case "IN_PROGRESS": return "bg-amber-100 text-amber-700 border-amber-200"
+      case "CANCELED": return "bg-amber-100 text-amber-700 border-amber-200"
       case "CLOSED": return "bg-primary text-background border-primary"
       default: return "bg-slate-100 text-slate-700"
     }
@@ -52,7 +57,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6">
-      <Link href="/dashboard/my-ticket" className="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors w-fit group">
+      <Link href="/dashboard/tickets" className="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors w-fit group">
         <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
         <span className="text-sm font-bold">Back</span>
       </Link>
@@ -68,6 +73,11 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
           <p className="text-slate-500 text-sm">ID Ticket: <span className="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded">#{String(ticket.id).slice(0, 8)}</span></p>
         </div>
       </div>
+      <StatusEditor 
+            ticketId={ticket.id} 
+            initialStatus={ticket.status} 
+            ownerId={ticket.user_id} 
+        />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -80,47 +90,40 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
               <Separator />
               
               <div className="relative pl-8 space-y-8 before:absolute before:inset-0 before:left-[11px] before:h-full before:w-[2px] before:bg-slate-100 before:content-['']">
-                
-                {/* 1. Tampilkan Logs Terbaru (Update Status) */}
-                {logs.map((log: TicketLog, index: number) => (
-                  <div key={log.id} className="relative">
-                    <div className={`absolute -left-[27px] mt-1 h-4 w-4 rounded-full border-4 border-white ${
-                      index === 0 ? "bg-primary shadow-[0_0_0_4px_rgba(16,185,129,0.1)]" : "bg-slate-300"
-                    }`} />
-                    
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                      <div>
+                {logs.length > 0 ? (
+                  logs.map((log: TicketLog, index: number) => (
+                    <div key={log.id} className="relative">
+                      <div className={`absolute -left-[27px] mt-1 h-4 w-4 rounded-full border-4 border-white ${
+                        index === 0 
+                        ? "bg-primary"
+                        : "bg-slate-300"
+                      }`} />
+                      
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                         <p className={`text-sm ${index === 0 ? "font-bold text-slate-900" : "font-medium text-slate-500"}`}>
-                          {log.status_update}
+                          {log.status_update || log.notes}
                         </p>
-                        {log.notes && <p className="text-xs text-slate-400 mt-0.5">{log.notes}</p>}
+                        <time className="text-[11px] font-bold text-slate-400 uppercase">
+                          {new Date(log.created_at).toLocaleString('id-ID', {
+                            day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                          })}
+                        </time>
                       </div>
-                      <time className="text-[11px] font-bold text-slate-400 uppercase shrink-0">
-                        {new Date(log.created_at).toLocaleString('id-ID', {
-                          day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    </div>
+                  ))
+                ) : (
+                  <div className="relative">
+                    <div className="absolute -left-[27px] mt-1 h-4 w-4 rounded-full border-4 border-white bg-primary shadow-[0_0_0_4px_rgba(16,185,129,0.1)]" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                      <p className="text-sm font-bold text-slate-900">Ticket created successfully</p>
+                      <time className="text-[11px] font-bold text-slate-400 uppercase">
+                        {new Date(ticket.created_at).toLocaleString('id-ID', {
+                           day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
                         })}
                       </time>
                     </div>
                   </div>
-                ))}
-
-                {/* 2. Selalu Tampilkan Log Pembuatan Tiket di Paling Bawah */}
-                <div className="relative">
-                  <div className={`absolute -left-[27px] mt-1 h-4 w-4 rounded-full border-4 border-white ${
-                    logs.length === 0 ? "bg-primary shadow-[0_0_0_4px_rgba(16,185,129,0.1)]" : "bg-slate-300"
-                  }`} />
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <p className={`text-sm ${logs.length === 0 ? "font-bold text-slate-900" : "font-medium text-slate-500"}`}>
-                      Ticket created successfully
-                    </p>
-                    <time className="text-[11px] font-bold text-slate-400 uppercase shrink-0">
-                      {new Date(ticket.created_at).toLocaleString('id-ID', {
-                        day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                      })}
-                    </time>
-                  </div>
-                </div>
-
+                )}
               </div>
             </div>
           </Card>
@@ -179,7 +182,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                   <p className="text-sm font-semibold mb-2">{ticket.phone_number || "-"}</p>
                   {ticket.phone_number && (
                     <Button asChild className="w-full bg-primary hover:bg-primary text-white rounded-xl h-8 text-[11px] font-bold">
-                      <a href={`https:wa.me/${ticket.phone_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">
+                      <a href={`https://wa.me/62${ticket.phone_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">
                         Contact via WhatsApp
                       </a>
                     </Button>
@@ -189,8 +192,13 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
 
               <Separator />
               <div className="flex items-center gap-3 pt-2">
-                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold font-mono uppercase">ME</div>
-                <div><p className="text-[10px] font-bold text-slate-400 uppercase">Reporter</p><p className="text-sm font-semibold">Me</p></div>
+                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white text-[10px] font-bold uppercase">
+                  {ticket.profiles?.full_name?.substring(0, 2) || "US"}
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">Reporter</p>
+                  <p className="text-sm font-semibold">{ticket.profiles?.full_name || "Unknown User"}</p>
+                </div>
               </div>
             </div>
           </Card>
