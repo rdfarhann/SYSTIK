@@ -52,7 +52,7 @@ export function AddUserDialog() {
           extension: "", 
           email: "", 
           department: "", 
-          role: "USER" 
+          role: "" 
         })
       } else {
         toast.error(`Gagal: ${result.error}`)
