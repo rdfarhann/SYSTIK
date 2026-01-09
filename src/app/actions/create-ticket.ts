@@ -2,7 +2,7 @@
 
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
-import { CreateTicketInput } from "../types/ticket"
+import { CreateTicketInput } from "../../../.next/dev/types/ticket"
 
 export async function createTicket(formData: CreateTicketInput, base64Image?: string) {
   const supabase = await createSupabaseServer()

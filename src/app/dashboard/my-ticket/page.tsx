@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { Ticket } from "@/app/types/ticket"
+import { Ticket } from "../../../../.next/dev/types/ticket"
 import { Clock, MessageCircle, AlertCircle } from "lucide-react"
 
 export default async function MyTicketsPage() {
@@ -20,13 +20,11 @@ export default async function MyTicketsPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl mx-auto w-full">
-      {/* JUDUL HALAMAN */}
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">My Ticket History</h1>
         <p className="text-muted-foreground text-sm font-medium">Monitor the progress of your technical assistance.</p>
       </div>
 
-      {/* ERROR HANDLING */}
       {ticketsError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700 animate-in fade-in duration-300">
           <AlertCircle className="h-5 w-5" />
@@ -34,7 +32,6 @@ export default async function MyTicketsPage() {
         </div>
       )}
 
-      {/* EMPTY STATE */}
       {allTickets.length === 0 && !ticketsError ? (
         <div className="flex flex-col items-center justify-center p-12 bg-white rounded-3xl border border-dashed border-slate-300 text-center shadow-sm">
           <Clock className="h-12 w-12 text-slate-300 mb-4" />
@@ -47,7 +44,7 @@ export default async function MyTicketsPage() {
           </Link>
         </div>
       ) : (
-        /* LIST TIKET */
+
         <div className="grid gap-4">
           {allTickets.map((ticket) => (
             <div key={ticket.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-primary/20 transition-all group animate-in fade-in slide-in-from-bottom-3 duration-500">

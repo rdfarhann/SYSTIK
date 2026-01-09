@@ -6,8 +6,6 @@ import UserListTable from "@/components/user/user-list-table"
 
 export default async function UserManagementPage() {
   const supabase = await createSupabaseServer()
-  
-  /* ================= AUTH & ROLE CHECK ================= */
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/")
 
@@ -17,12 +15,10 @@ export default async function UserManagementPage() {
     .eq("id", user.id)
     .single()
 
-  // Proteksi halaman: Hanya ADMIN yang bisa masuk
   if (profile?.role !== "ADMIN") {
     redirect("/dashboard")
   }
-
-  /* ================= FETCH ALL USERS DATA ================= */
+  
   const { data: allUsers, error: usersError } = await supabase
     .from("profiles")
     .select("id, full_name, extension, email, department, role")
@@ -39,7 +35,7 @@ export default async function UserManagementPage() {
 
   return (
     <section className="flex flex-1 flex-col gap-6 p-4 sm:p-8 max-w-7xl mx-auto w-full">
-      {/* HEADER SECTION */}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="bg-primary flex h-14 w-14 items-center justify-center rounded-xl shadow-md text-primary-foreground shrink-0">
@@ -54,12 +50,8 @@ export default async function UserManagementPage() {
             </p>
           </div>
         </div>
-        
-        {/* Tombol Tambah User */}
         <AddUserDialog />
       </div>
-      
-      {/* TABLE SECTION */}
       <div className="w-full bg-card rounded-xl border shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
         <UserListTable users={allUsers || []} />
       </div>

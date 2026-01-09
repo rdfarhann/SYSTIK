@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import StatusEditor from "@/components/tickets/status-editor"
 
-// 1. Definisikan Interface untuk Log Tiket agar tidak menggunakan 'any'
 interface TicketLog {
   id: string;
   ticket_id: string;
@@ -39,7 +38,6 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
 
   if (error || !ticket) notFound()
 
-  // 2. Gunakan tipe data TicketLog[] menggantikan any
   const logs: TicketLog[] = (ticket.ticket_logs || []).sort((a: TicketLog, b: TicketLog) => 
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )
@@ -57,7 +55,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6">
-      <Link href="/dashboard/tickets" className="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors w-fit group">
+      <Link href="/dashboard/admin/tickets" className="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors w-fit group">
         <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
         <span className="text-sm font-bold">Back</span>
       </Link>

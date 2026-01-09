@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-
+import UserAvatar from "../user/user-avatar"
 import {
   Sidebar,
   SidebarHeader,
@@ -14,12 +14,10 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar"
-
 import {
   LayoutDashboard,
   Ticket,
   Users,
-
   ChevronRight,
   ChevronDown,
 } from "lucide-react"
@@ -29,19 +27,23 @@ interface AppSidebarAdminProps {
     full_name?: string | null
     extension?: string | null
     role?: string | null
+    avatar_url?: string | null 
   } | null
 }
 
 export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
   const [isTicketsOpen, setIsTicketsOpen] = useState(false)
   const pathname = usePathname()
-
+  const avatarUrl = userProfile?.avatar_url || null
+  const displayName = userProfile?.full_name || "User"
+  const extension = userProfile?.extension || "-"
+  
   const subMenuItems = [
-    { label: "All Tickets", href: "/dashboard/tickets" },
-    { label: "Open", href: "/dashboard/tickets?status=open" },
-    { label: "In Progress", href: "/dashboard/tickets?status=in-progress" },
-    { label: "Closed", href: "/dashboard/tickets?status=closed" },
-    { label: "Canceled", href: "/dashboard/tickets?status=canceled" },
+    { label: "All Tickets", href: "/dashboard/admin/tickets" },
+    { label: "Open", href: "/dashboard/admin/tickets?status=open" },
+    { label: "In Progress", href: "/dashboard/admin/tickets?status=in-progress" },
+    { label: "Closed", href: "/dashboard/admin/tickets?status=closed" },
+    { label: "Canceled", href: "/dashboard/admin/tickets?status=canceled" },
   ]
 
   return (
@@ -59,8 +61,8 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
             />
           </div>
           <div className="leading-tight min-w-0">
-            <p className="font-bold text-lg tracking-tight truncate drop-shadow-sm">SYSTIK</p>
-            <p className="text-[10px] uppercase tracking-widest opacity-70 font-bold truncate">Admin Panel</p>
+            <p className="font-bold text-lg tracking-tight truncate drop-shadow-sm text-white">SYSTIK</p>
+            <p className="text-[10px] uppercase tracking-widest opacity-70 font-bold truncate text-white">Admin Panel</p>
           </div>
         </div>
       </SidebarHeader>
@@ -68,8 +70,6 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
       {/* ================= CONTENT ================= */}
       <SidebarContent className="px-3">
         <SidebarMenu className="gap-1">
-          
-          {/* DASHBOARD */}
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="h-10 px-3 active:scale-[0.98] transition-all">
               <Link href="/dashboard" className="flex items-center gap-3 w-full">
@@ -79,7 +79,6 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* TICKET MANAGEMENT (MANUAL DROP-DOWN - NO WRAP) */}
           <SidebarMenuItem className="flex flex-col">
             <button 
               onClick={() => setIsTicketsOpen(!isTicketsOpen)}
@@ -94,7 +93,6 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
               <ChevronDown className={`h-4 w-4 shrink-0 transition-transform duration-300 ${isTicketsOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* SUB-MENU CONTAINER */}
             <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isTicketsOpen ? 'max-h-60 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
               <div className="ml-5 border-l-2 border-white/10 flex flex-col gap-0.5">
                 {subMenuItems.map((item) => (
@@ -111,10 +109,9 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
             </div>
           </SidebarMenuItem>
 
-          {/* LAINNYA */}
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="h-10 px-3 ">
-              <Link href="/dashboard/user-management" className="flex items-center gap-3">
+              <Link href="/dashboard/admin/user-management" className="flex items-center gap-3">
                 <Users className="h-5 w-5 shrink-0" />
                 <span className="font-medium text-[14px]">User Management</span>
               </Link>
@@ -126,19 +123,20 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
       {/* ================= FOOTER ================= */}
       <SidebarFooter className="border-t border-white/10 px-4 py-4 bg-black/10">
         <div className="flex flex-col gap-1.5">
-          <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold">Logged In As</p>
+          <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold text-white">Logged In As</p>
           <div className="flex items-center gap-3">
-             <div className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center text-[11px] font-bold shadow-inner shrink-0 border border-white/5">
-               {userProfile?.full_name?.substring(0,2).toUpperCase() ?? "US"}
-             </div>
-             <div className="min-w-0">
-                <p className="font-semibold text-[14px] truncate drop-shadow-sm leading-none mb-1">
-                  {userProfile?.full_name ?? "User"}
-                </p>
-                <p className="text-[11px] opacity-50 truncate leading-none italic">
-                  Ext: {userProfile?.extension ?? "-"}
-                </p>
-             </div>
+            <UserAvatar 
+              src={avatarUrl} 
+              fallback={displayName.substring(0, 2).toUpperCase()} 
+            />
+            <div className="min-w-0 flex flex-col">
+              <span className="text-[13px] font-bold leading-tight text-white truncate">
+                {displayName}
+              </span>
+              <span className="text-[10px] font-medium text-white/50 uppercase tracking-wider">
+                Ext: {extension}
+              </span>
+            </div>
           </div>
         </div>
       </SidebarFooter>

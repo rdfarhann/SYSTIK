@@ -13,7 +13,6 @@ export default async function AgentDashboardPage() {
     .eq("id", user.id)
     .single()
 
-  // 🔐 AGENT ONLY
   if (profile?.role !== "agent") {
     redirect("/dashboard/agent")
   }

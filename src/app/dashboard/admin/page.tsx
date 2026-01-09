@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { AlertTriangle, ShieldCheck } from "lucide-react"
-import { Ticket } from "@/app/types/ticket"
+import { Ticket } from "../../../../.next/dev/types/ticket"
 
 export default async function UserDashboardPage({
   searchParams,

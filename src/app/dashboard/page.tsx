@@ -4,7 +4,7 @@ import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { ChevronRight, AlertTriangle, ShieldCheck } from "lucide-react"
 import DashboardHero from "@/components/layout/dashboard-hero"
-import { Ticket } from "../types/ticket"
+import { Ticket } from "../../../.next/dev/types/ticket"
 
 export default async function UserDashboardPage({
 }: {

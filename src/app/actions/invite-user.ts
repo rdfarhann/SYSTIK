@@ -29,7 +29,7 @@ export async function inviteNewUser(formData: InviteFormData) {
     const { data, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
       formData.email, 
       {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/confirm-password`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/password/confirm-password`,
         data: { 
           full_name: formData.full_name,
           extension: formData.extension,

@@ -22,8 +22,6 @@ export function DynamicBreadcrumb() {
         {pathSegments.map((segment, index) => {
           const href = `/${pathSegments.slice(0, index + 1).join("/")}`
           const isLast = index === pathSegments.length - 1
-          
-          // Mengubah format text (contoh: my-ticket menjadi My Ticket)
           const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ")
 
           return (

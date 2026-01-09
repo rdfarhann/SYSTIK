@@ -13,11 +13,11 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar"
-
+import UserAvatar from "../user/user-avatar"
 import {
   LayoutDashboard,
   Ticket,
-  ChevronRight,
+  Settings
 } from "lucide-react"
 
 interface AppSidebarProps {
@@ -25,11 +25,15 @@ interface AppSidebarProps {
     full_name?: string | null
     extension?: string | null
     role?: string | null
+    avatar_url?: string | null 
   } | null
 }
 
 export function AppSidebar({ userProfile }: AppSidebarProps) {
   const pathname = usePathname()
+  const avatarUrl = userProfile?.avatar_url || null
+  const displayName = userProfile?.full_name || "User"
+  const extension = userProfile?.extension || "-"
 
 
 
@@ -69,35 +73,42 @@ export function AppSidebar({ userProfile }: AppSidebarProps) {
           </SidebarMenuItem>
 
           <SidebarMenuItem>
-                <SidebarMenuButton asChild className="h-10 px-3 active:scale-[0.98] transition-all">
+            <SidebarMenuButton asChild className="h-10 px-3 active:scale-[0.98] transition-all">
                   <Link href="/dashboard/my-ticket" className="flex items-center gap-3 w-full">
                     <Ticket className="h-8 w-8 shrink-0" />
                     <span className="font-medium text-[14px]">My Tickets</span>
                   </Link>
                 </SidebarMenuButton>
-              </SidebarMenuItem>
+              </SidebarMenuItem>  
+              <SidebarMenuItem>
+            <SidebarMenuButton asChild className="h-10 px-3 active:scale-[0.98] transition-all">
+                  <Link href="/dashboard/profile" className="flex items-center gap-3 w-full">
+                    <Settings className="h-8 w-8 shrink-0" />
+                    <span className="font-medium text-[14px]">Settings Profile</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>     
             </SidebarMenu>
           </SidebarContent>
-
-      {/* ================= FOOTER ================= */}
       <SidebarFooter className="border-t border-white/10 px-4 py-4 bg-black/10">
-        <div className="flex flex-col gap-1.5">
-          <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold">Logged In As</p>
-          <div className="flex items-center gap-3">
-             <div className="h-10 w-10 rounded-full bg-white/15 flex items-center justify-center text-[11px] font-bold shadow-inner shrink-0 border border-white/5">
-               {userProfile?.full_name?.substring(0,2).toUpperCase() ?? "US"}
-             </div>
-             <div className="min-w-0">
-                <p className="font-semibold text-[14px] truncate drop-shadow-sm leading-none mb-1">
-                  {userProfile?.full_name ?? "User"}
-                </p>
-                <p className="text-[11px] opacity-50 truncate leading-none italic">
-                  Ext: {userProfile?.extension ?? "-"}
-                </p>
-             </div>
-          </div>
-        </div>
-      </SidebarFooter>
+            <div className="flex flex-col gap-1.5">
+              <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold text-white">Logged In As</p>
+              <div className="flex items-center gap-3">
+                <UserAvatar 
+                  src={avatarUrl} 
+                  fallback={displayName.substring(0, 2).toUpperCase()} 
+                />
+                <div className="min-w-0">
+                  <p className="font-semibold text-[14px] truncate text-white leading-none mb-1">
+                    {displayName}
+                  </p>
+                  <p className="text-[11px] opacity-50 truncate text-white/70 italic leading-none">
+                    Ext: {userProfile?.extension ?? "-"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </SidebarFooter>
     </Sidebar>
   )
 }
