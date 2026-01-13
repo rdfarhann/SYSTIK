@@ -109,7 +109,7 @@ export function AddUserDialog() {
             <Input 
               id="email" 
               type="email" 
-              placeholder="user@pupuk-kujang.com" 
+              placeholder="E.g. agus@gmail.com" 
               required 
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -140,7 +140,6 @@ export function AddUserDialog() {
                 <SelectContent>
                   <SelectItem value="USER">User</SelectItem>
                   <SelectItem value="ADMIN">Admin</SelectItem>
-                  <SelectItem value="AGENT">Agent</SelectItem>
                 </SelectContent>
               </Select>
             </div>

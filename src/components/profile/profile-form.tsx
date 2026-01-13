@@ -58,7 +58,7 @@ export default function ProfileForm({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <form className="md:col-span-2 bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+      <form className="md:col-span-2 bg-background p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
         <div className="space-y-2">
           <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
           <div className="relative group">
@@ -66,7 +66,8 @@ export default function ProfileForm({
             <input 
               type="text" 
               defaultValue={profile?.full_name || ""} 
-              className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
+              disabled
+              className="w-full pl-11 pr-4 py-3 bg-slate-100 border border-slate-100 rounded-2xl text-sm font-bold text-slate-500 cursor-not-allowed" 
             />
           </div>
         </div>
@@ -90,8 +91,9 @@ export default function ProfileForm({
               <Building2 className="absolute left-4 top-3.5 h-4 w-4 text-slate-400" />
               <input 
                 type="text" 
-                defaultValue={profile?.department || ""} 
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold outline-none transition-all focus:ring-2 focus:ring-primary/20" 
+                defaultValue={profile?.department || ""}
+                disabled
+                className="w-full pl-11 pr-4 py-3 bg-slate-100 border border-slate-100 rounded-2xl text-sm font-bold text-slate-500 cursor-not-allowed" 
               />
             </div>
           </div>
@@ -102,7 +104,8 @@ export default function ProfileForm({
               <input 
                 type="text" 
                 defaultValue={profile?.extension || ""} 
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold outline-none transition-all focus:ring-2 focus:ring-primary/20" 
+                disabled
+                className="w-full pl-11 pr-4 py-3 bg-slate-100 border border-slate-100 rounded-2xl text-sm font-bold text-slate-500 cursor-not-allowed" 
               />
             </div>
           </div>
@@ -114,27 +117,34 @@ export default function ProfileForm({
         </Button>
       </form>
 
-      <div className="space-y-6">
-        <div className="bg-primary h-100 w-80 rounded-[2.5rem] text-center text-white shadow-xl flex flex-col items-center group">
+      {/* KOLOM KANAN - FOTO PROFIL */}
+      <div className="bg-background p-8 rounded-[2.5rem] border border-slate-200 shadow-sm text-center">
+        <div className="flex flex-col items-center">
           <div 
-            className="relative cursor-pointer" 
+            className="relative cursor-pointer group" 
             onClick={() => !loading && fileInputRef.current?.click()}
           >
-            <div className="mt-20 h-35 w-35 rounded-full border-2 border-foreground overflow-hidden bg-background flex items-center justify-center ring-4 ring-primary/20 transition-all group-hover:ring-primary/50">
+            {/* Wadah Lingkaran Foto - Dibuat Tengah */}
+            <div className="h-32 w-32 rounded-full border-2 border-slate-200 overflow-hidden bg-slate-50 flex items-center justify-center ring-4 ring-slate-50 shadow-inner transition-all group-hover:ring-primary/10">
               {previewUrl ? (
                 <img src={previewUrl} alt="Avatar" className="h-full w-full object-cover" />
               ) : (
-                <User className="h-12 w-12 text-primary" />
+                <User className="h-12 w-12 text-slate-300" />
               )}
             </div>
+
+            {/* Loading Overlay */}
             {loading && (
-              <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
-                <Loader2 className="h-8 w-8 text-white animate-spin" />
+              <div className="absolute inset-0 bg-white/60 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <Loader2 className="h-8 w-8 text-primary animate-spin" />
               </div>
             )}
-            <div className="absolute bottom-1 right-1 bg-background p-2 rounded-full shadow-lg border-2 border-slate-900 group-hover:scale-110 transition-transform">
-              <Camera className="h-4 w-4 text-primary" />
+
+            {/* Camera Icon - Posisi Sudut */}
+            <div className="absolute bottom-1 right-1 bg-primary p-2 rounded-full shadow-lg border-4 border-white group-hover:scale-110 transition-transform">
+              <Camera className="h-4 w-4 text-white" />
             </div>
+
             <input 
               type="file" 
               ref={fileInputRef} 
@@ -144,14 +154,14 @@ export default function ProfileForm({
             />
           </div>
           
-          <div className="mt-10">
-            <h2 className="font-bold text-lg leading-tight">{profile?.full_name || "User"}</h2>
-            <p className="text-[10px] font-black text-background uppercase tracking-[0.2em] mt-2">{profile?.role || "Staff"}</p>
+          <div className="mt-6">
+            <h2 className="font-black text-xl leading-tight text-slate-800 uppercase tracking-tight">{profile?.full_name || "User"}</h2>
+            <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mt-1 px-3 py-1 bg-primary/5 rounded-full inline-block">{profile?.role || "Staff"}</p>
           </div>
           
-          <div className="mt-6 pt-6 border-t border-slate-800 w-full">
-            <p className="text-[9px] text-background leading-relaxed uppercase font-bold tracking-widest">
-              Format: JPG, PNG (Maks 1MB)
+          <div className="mt-8 pt-6 border-t border-slate-100 w-full">
+            <p className="text-[10px] text-slate-400 leading-relaxed uppercase font-bold tracking-widest">
+              JPG, PNG (Maks 5MB)
             </p>
           </div>
         </div>

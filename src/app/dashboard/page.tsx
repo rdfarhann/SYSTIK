@@ -42,7 +42,7 @@ export default async function UserDashboardPage({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-900 tracking-tight">Your Latest Ticket</h2>
-          <Link href="/dashboard/my-ticket" className="text-xs font-semibold text-emerald-600 hover:underline">
+          <Link href="/dashboard/my-ticket" className="text-xs font-semibold text-primary hover:underline">
             See All
           </Link>
         </div>
@@ -62,15 +62,15 @@ export default async function UserDashboardPage({
               <Link
                 key={ticket.id}
                 href={`/dashboard/my-ticket/${ticket.id}`}
-                className="group bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between hover:border-emerald-500/50 hover:shadow-md transition-all"
+                className="group bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between hover:border-primary hover:shadow-md transition-all"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   <div className={`h-2 w-2 rounded-full shrink-0 ${ticket.status?.toUpperCase() === 'OPEN' ? 'bg-blue-500' :
                     ticket.status?.toUpperCase() === 'IN_PROGRESS' ? 'bg-amber-500' :
-                      'bg-emerald-500'
+                      'bg-primary'
                     }`} />
                   <div className="min-w-0">
-                    <p className="font-bold text-sm text-slate-900 truncate group-hover:text-emerald-600 transition-colors">
+                    <p className="font-bold text-sm text-slate-900 truncate group-hover:text-primary transition-colors">
                       {ticket.title}
                     </p>
                     <p className="text-[11px] text-slate-400 uppercase font-medium">
@@ -78,7 +78,7 @@ export default async function UserDashboardPage({
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+                <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />
               </Link>
             ))}
           </div>

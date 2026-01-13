@@ -79,14 +79,6 @@ export function AppSidebar({ userProfile }: AppSidebarProps) {
                     <span className="font-medium text-[14px]">My Tickets</span>
                   </Link>
                 </SidebarMenuButton>
-              </SidebarMenuItem>  
-              <SidebarMenuItem>
-            <SidebarMenuButton asChild className="h-10 px-3 active:scale-[0.98] transition-all">
-                  <Link href="/dashboard/profile" className="flex items-center gap-3 w-full">
-                    <Settings className="h-8 w-8 shrink-0" />
-                    <span className="font-medium text-[14px]">Settings Profile</span>
-                  </Link>
-                </SidebarMenuButton>
               </SidebarMenuItem>     
             </SidebarMenu>
           </SidebarContent>
@@ -98,13 +90,13 @@ export function AppSidebar({ userProfile }: AppSidebarProps) {
                   src={avatarUrl} 
                   fallback={displayName.substring(0, 2).toUpperCase()} 
                 />
-                <div className="min-w-0">
-                  <p className="font-semibold text-[14px] truncate text-white leading-none mb-1">
+                <div className="min-w-0 flex flex-col">
+                  <span className="text-[13px] font-bold leading-tight text-white truncate">
                     {displayName}
-                  </p>
-                  <p className="text-[11px] opacity-50 truncate text-white/70 italic leading-none">
-                    Ext: {userProfile?.extension ?? "-"}
-                  </p>
+                  </span>
+                  <span className="text-[10px] font-medium text-white/50 uppercase tracking-wider">
+                    Ext: {extension}
+                  </span>
                 </div>
               </div>
             </div>

@@ -100,7 +100,6 @@ export default function NewTicketPage() {
   }
 
   return (
-    // Tidak ada SidebarProvider/Main/Header di sini karena sudah di layout.tsx
     <div className="max-w-4xl mx-auto p-4 sm:p-8 space-y-4 sm:space-y-6">
       <div className="flex flex-col gap-1">    
         <div className="flex items-center gap-2 sm:gap-3">
@@ -116,16 +115,18 @@ export default function NewTicketPage() {
 
       <Card className="p-5 sm:p-8 border-slate-200 shadow-xl shadow-slate-200/50 rounded-[1.5rem] sm:rounded-[2.5rem] bg-white border-none">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+          {/* SUBJECT - FULL WIDTH */}
           <div className="space-y-2">
             <label className="text-sm font-bold text-slate-700 ml-1 uppercase tracking-wider text-[11px]">Subject</label>
             <Input name="title" required className="rounded-xl sm:rounded-2xl border-slate-200 h-11 sm:h-12 text-sm focus:ring-primary/20 shadow-sm" placeholder="E.g Printer Ruang IT Macet" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {/* PERUBAHAN DISINI: CATEGORY & PRIORITY SEKARANG FULL WIDTH (STOCKED VERTICALLY) */}
+          <div className="space-y-4 sm:space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 ml-1 uppercase tracking-wider text-[11px]">Category</label>
               <Select onValueChange={setCategory} required>
-                <SelectTrigger className="rounded-xl sm:rounded-2xl h-11 sm:h-12 text-sm border-slate-200 shadow-sm">
+                <SelectTrigger className="rounded-xl sm:rounded-2xl h-11 sm:h-12 text-sm border-slate-200 shadow-sm w-full">
                   <SelectValue placeholder="select category" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
@@ -139,7 +140,7 @@ export default function NewTicketPage() {
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 ml-1 uppercase tracking-wider text-[11px]">Priority</label>
               <Select onValueChange={setPriority} required>
-                <SelectTrigger className="rounded-xl sm:rounded-2xl h-11 sm:h-12 text-sm border-slate-200 shadow-sm">
+                <SelectTrigger className="rounded-xl sm:rounded-2xl h-11 sm:h-12 text-sm border-slate-200 shadow-sm w-full">
                   <SelectValue placeholder="select priority" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
@@ -196,4 +197,4 @@ export default function NewTicketPage() {
       </Card>
     </div>
   )
-} 
+}
