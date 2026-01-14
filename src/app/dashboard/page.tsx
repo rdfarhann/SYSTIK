@@ -46,7 +46,7 @@ export default async function UserDashboardPage({
             See All
           </Link>
         </div>
-
+        
         {ticketsError ? (
           <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" /> Gagal memuat data tiket.

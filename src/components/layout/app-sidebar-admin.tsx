@@ -22,7 +22,7 @@ import {
   ChevronDown,
 } from "lucide-react"
 
-interface AppSidebarAdminProps {
+interface AppSidebarAdminProps { 
   userProfile?: {
     full_name?: string | null
     extension?: string | null
@@ -48,7 +48,6 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
 
   return (
     <Sidebar className="w-64 bg-sidebar text-background border-r-0 shadow-xl">
-      {/* ================= HEADER ================= */}
       <SidebarHeader className="border-b border-white/10">
         <div className="flex items-center gap-3 px-3 py-4">
           <div className="bg-white/10 p-1.5 rounded-xl shadow-lg border border-white/10 shrink-0">
@@ -66,8 +65,6 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
           </div>
         </div>
       </SidebarHeader>
-
-      {/* ================= CONTENT ================= */}
       <SidebarContent className="px-3">
         <SidebarMenu className="gap-1">
           <SidebarMenuItem>
@@ -120,7 +117,6 @@ export function AppSidebarAdmin({ userProfile }: AppSidebarAdminProps) {
         </SidebarMenu>
       </SidebarContent>
 
-      {/* ================= FOOTER ================= */}
       <SidebarFooter className="border-t border-white/10 px-4 py-4 bg-black/10">
         <div className="flex flex-col gap-1.5">
           <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold text-white">Logged In As</p>

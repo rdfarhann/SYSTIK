@@ -3,6 +3,7 @@ import { createSupabaseServer } from "@/lib/supabase/server"
 import { Ticket as TicketIcon, AlertTriangle, MessageCircle, User as UserIcon, Building2 } from "lucide-react"
 import { redirect } from "next/navigation"
 import { Ticket } from "../../../../../.next/dev/types/ticket"
+import TicketSearch from "@/components/tickets/search-ticket"
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
@@ -23,15 +24,17 @@ function StatusBadge({ status }: { status: string }) {
 export default async function TicketsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; q?: string }>;
 }) {
-  const { status } = await searchParams;
+  const { status, q } = await searchParams;
   const supabase = await createSupabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) redirect("/")
+  
   const statusFormatted = status && status !== "all" ? status.replace("-", "_").toUpperCase() : null;
-  const query = supabase
+  
+  let query = supabase
     .from("tickets")
     .select(`
       *,
@@ -42,19 +45,36 @@ export default async function TicketsPage({
     `)
     .order("created_at", { ascending: false });
 
+
   if (statusFormatted) {
-    query.eq("status", statusFormatted);
+    query = query.eq("status", statusFormatted);
+  }
+
+  if (q) {
+    const searchAsNumber = parseInt(q);
+    if (!isNaN(searchAsNumber)) {
+      query = query.or(`id.eq.${searchAsNumber},title.ilike.%${q}%,description.ilike.%${q}%`);
+    } else {
+      query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`);
+    }
   }
   
   const { data: ticketsData, error: ticketsError } = await query;
 
-
-  const allTickets = (ticketsData as (Ticket & { 
+  let allTickets = (ticketsData as (Ticket & { 
     profiles: { 
       full_name: string;
       department: string; 
     } | null
   })[]) || [];
+
+  if (q && isNaN(parseInt(q))) {
+    allTickets = allTickets.filter(ticket => 
+      ticket.profiles?.full_name?.toLowerCase().includes(q.toLowerCase()) ||
+      ticket.title?.toLowerCase().includes(q.toLowerCase()) ||
+      ticket.description?.toLowerCase().includes(q.toLowerCase())
+    );
+  }
   
   const pageTitle = status && status !== "all"
     ? status.replace("-", " ").toUpperCase() 
@@ -76,12 +96,15 @@ export default async function TicketsPage({
         </div>
       </div>
       
+      <TicketSearch />
+      
       {ticketsError && (
         <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-center gap-3 text-red-800">
           <AlertTriangle className="h-5 w-5" />
           <p className="text-xs font-medium">Database Error: {ticketsError.message}</p>
         </div>
       )}
+      
       <div className="grid gap-4">
           {allTickets.length > 0 ? (
             allTickets.map((ticket) => (
@@ -89,8 +112,8 @@ export default async function TicketsPage({
                 <div className="flex justify-between items-start mb-3">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
-                        #{ticket.id.toString().slice(0, 8)}
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-primary">
+                        #{ticket.id}
                       </span>
                       <span className="text-slate-300">•</span>
                       
@@ -140,7 +163,9 @@ export default async function TicketsPage({
             ))
           ) : (
             <div className="py-20 text-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
-              <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">No tickets found in {pageTitle}</p>
+              <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">
+                {q ? `No results found for "${q}"` : `No tickets found in ${pageTitle}`}
+              </p>
             </div>
           )}
         </div>

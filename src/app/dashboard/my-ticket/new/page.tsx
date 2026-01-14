@@ -133,6 +133,9 @@ export default function NewTicketPage() {
                   <SelectItem value="HARDWARE">Hardware</SelectItem>
                   <SelectItem value="SOFTWARE">Software</SelectItem>
                   <SelectItem value="NETWORK">Network</SelectItem>
+                  <SelectItem value="ACCOUNT">Account</SelectItem>
+                  <SelectItem value="GENERAL">General Inquiry</SelectItem>
+                  <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
                 </SelectContent>
               </Select>
             </div>

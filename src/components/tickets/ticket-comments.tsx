@@ -5,14 +5,13 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Send, User as UserIcon, Loader2 } from "lucide-react"
 
-// Definisikan struktur profil user
+
 interface Profile {
   full_name: string | null
   avatar_url: string | null
   role: string | null
 }
 
-// Definisikan struktur komentar
 interface Comment {
   id: string
   message: string
@@ -31,10 +30,10 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
   const [comments, setComments] = useState<Comment[]>(initialComments)
   const [newMessage, setNewMessage] = useState<string>("")
   const [isSending, setIsSending] = useState<boolean>(false)
-  const scrollRef = useRef<HTMLDivElement>(null) // Untuk auto-scroll
+  const scrollRef = useRef<HTMLDivElement>(null) 
   const supabase = createClient()
 
-  // --- LOGIKA REALTIME ---
+
   useEffect(() => {
     const channel = supabase
       .channel(`ticket-chat-${ticketId}`)
@@ -47,7 +46,6 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
           filter: `ticket_id=eq.${ticketId}`,
         },
         async (payload) => {
-          // Ambil profil pengirim untuk pesan yang baru masuk (Realtime)
           const { data: profileData } = await supabase
             .from("profiles")
             .select("full_name, avatar_url, role")
@@ -63,7 +61,6 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
           };
 
           setComments((prev) => {
-            // Validasi agar tidak terjadi duplikasi pesan di UI pengirim
             if (prev.find(c => c.id === newComment.id)) return prev;
             return [...prev, newComment];
           });
@@ -76,7 +73,6 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
     };
   }, [ticketId, supabase]);
 
-  // --- AUTO SCROLL KE BAWAH ---
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -89,8 +85,6 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
 
     setIsSending(true);
     try {
-      // Kita cukup insert ke database saja. 
-      // Listener Realtime di atas yang akan bertugas menambahkan pesan ke daftar 'comments'.
       const { error: insertError } = await supabase
         .from("ticket_comments")
         .insert([
@@ -113,10 +107,10 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2 font-bold text-slate-800">
-        <div className="bg-primary/10 p-1.5 rounded-lg">
-          <Send className="h-4 w-4 text-primary" />
+    <div className="space-y-5">
+      <div className="flex items-center gap-5 font-bold text-slate-800 p-4">
+        <div className="bg-primary/10 p-2 rounded-lg">
+          <Send className="h-3 w-3 text-primary " />
         </div>
         Discussion
       </div>
@@ -149,7 +143,6 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
                     {comment.profiles?.full_name || "Unknown User"}
                   </span>
                   
-                  {/* Badge Role */}
                   {comment.profiles?.role && (
                     <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-bold border ${
                       comment.profiles.role.toUpperCase() === 'ADMIN' 

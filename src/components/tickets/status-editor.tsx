@@ -39,10 +39,7 @@ export default function StatusEditor({ ticketId, initialStatus, ownerId }: Statu
     
     setIsLoading(true)
     try {
-      // Konversi ke Number karena database menggunakan int8
       const numericId = typeof ticketId === 'string' ? parseInt(ticketId, 10) : ticketId
-
-      // 1. Update Tabel Tickets
       const { data, error: ticketError } = await supabase
         .from("tickets")
         .update({ status: newStatus })
@@ -51,12 +48,10 @@ export default function StatusEditor({ ticketId, initialStatus, ownerId }: Statu
 
       if (ticketError) throw ticketError
 
-      // Jika RLS memblokir, data akan kosong
       if (!data || data.length === 0) {
         throw new Error("Izin ditolak. Pastikan akun Anda memiliki role 'admin' di tabel profiles.")
       }
 
-      // 2. Insert Log & Notifikasi (Parallel)
       await Promise.allSettled([
         supabase.from("ticket_logs").insert({
           ticket_id: numericId,
@@ -67,7 +62,7 @@ export default function StatusEditor({ ticketId, initialStatus, ownerId }: Statu
           user_id: ownerId,
           ticket_id: numericId,
           title: "Update Tiket",
-          message: `Tiket #${numericId} kini berstatus ${newStatus}`,
+          message: `Ticket #${numericId} status update to ${newStatus}`,
           is_read: false
         })
       ])

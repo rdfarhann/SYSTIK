@@ -31,7 +31,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
     .select(`
       *, 
       ticket_logs (*),
-      profiles!user_id (full_name, avatar_url, email, department)
+      profiles!user_id (full_name, avatar_url, email, department, extension)
     `)
     .eq("id", id)
     .single()
@@ -77,7 +77,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
           <span className="text-xs font-bold uppercase tracking-wider">Back to Admin List</span>
         </Link>
         <div className="flex items-center gap-2">
-           <span className="text-[10px] font-mono bg-slate-100 px-2 py-1 rounded text-slate-500">ID: #{String(ticket.id).slice(0, 8)}</span>
+           <span className="text-[12px] font-mono bg-slate-100 px-2 py-1 rounded text-slate-500">ID: #{String(ticket.id).slice(0, 8)}</span>
            <Badge className={`${getStatusColor(ticket.status)} border font-bold uppercase text-[10px] px-3`}>
              {ticket.status.replace('_', ' ')}
            </Badge>
@@ -100,13 +100,11 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
           </div>
         </div>
       </div>
-     
         <StatusEditor 
           ticketId={ticket.id} 
           initialStatus={ticket.status} 
           ownerId={ticket.user_id} 
         />
-     
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <div className="lg:col-span-8 space-y-5">
           <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden">
@@ -115,7 +113,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                 <FileText className="h-4 w-4 text-primary" />
                 Ticket Description
               </div>
-              <div className="text-slate-600 leading-relaxed whitespace-pre-wrap text-sm border-l-2 border-primary/20 pl-4">
+              <div className="text-slate-600 leading-relaxed whitespace-pre-wrap text-sm border-l-4 border-primary/20 pl-5">
                 {ticket.description}
               </div>
               
@@ -127,15 +125,15 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                         <img src={ticket.attachment_url} alt="Thumbnail" className="w-full h-full object-cover" />
                       </div>
                       <div className="flex flex-col truncate">
-                        <span className="text-[11px] font-bold text-slate-700 truncate">Attachment_File</span>
+                        <span className="text-[11px] font-bold text-slate-700 truncate">Attachment</span>
                         <span className="text-[9px] text-slate-400 font-medium">Click to view/download</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" asChild className="h-8 w-8 text-slate-400 hover:text-primary">
+                      <Button variant="ghost" size="icon" asChild className="h-8 w-8 text-foreground hover:text-background hover:bg-primary">
                         <a href={ticket.attachment_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" /></a>
                       </Button>
-                      <Button variant="ghost" size="icon" asChild className="h-8 w-8 text-slate-400 hover:text-primary">
+                      <Button variant="ghost" size="icon" asChild className="h-8 w-8 text-foreground hover:text-background hover:bg-primary">
                         <a href={ticket.attachment_url} download><Download className="h-4 w-4" /></a>
                       </Button>
                     </div>
@@ -158,33 +156,33 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
 
         <div className="lg:col-span-4 space-y-5">
           <Card className="p-5 rounded-2xl border-slate-200 shadow-sm bg-white">
-            <h3 className="font-bold text-slate-800 mb-4 text-[11px] uppercase tracking-widest flex items-center gap-2">
+            <h3 className="font-bold text-slate-800 mb-4 text-[13px] uppercase tracking-widest flex items-center gap-2">
               <Clock className="h-3.5 w-3.5 text-primary" />
               Activity Log
             </h3>
             <div className="relative pl-6 space-y-5 before:absolute before:inset-0 before:left-[7px] before:h-full before:w-[1.5px] before:bg-slate-100">
               {logs.length > 0 ? logs.slice(0, 5).map((log: TicketLog, index: number) => (
                 <div key={log.id} className="relative">
-                  <div className={`absolute -left-[23px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-white ${
+                  <div className={`absolute -left-[22px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-white ${
                     index === 0 ? "bg-primary" : "bg-slate-300"
                   }`} />
-                  <p className={`text-[12px] leading-tight ${index === 0 ? "font-bold text-slate-900" : "font-medium text-slate-500"}`}>
+                  <p className={`text-[13px] leading-tight ${index === 0 ? "font-bold text-slate-900" : "font-medium text-slate-500"}`}>
                     {log.status_update}
                   </p>
-                  <time className="text-[10px] text-slate-400 font-medium">
+                  <time className="text-[11px] text-slate-400 font-medium">
                     {new Date(log.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </time>
                 </div>
               )) : (
                 <div className="relative">
                   <div className="absolute -left-[23px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-primary" />
-                  <p className="text-[12px] font-bold text-slate-900">No activity logged</p>
+                  <p className="text-[13px] font-bold text-slate-900">No activity logged</p>
                 </div>
               )}
               <div className="relative">
                 <div className="absolute -left-[23px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-slate-300" />
-                <p className="text-[12px] font-medium text-slate-500">Ticket Created</p>
-                <time className="text-[10px] text-slate-400 font-medium">
+                <p className="text-[13px] font-medium text-slate-500">Ticket Created</p>
+                <time className="text-[11px] text-slate-400 font-medium">
                    {new Date(ticket.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                 </time>
               </div>
@@ -201,10 +199,11 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                       )}
                    </div>
                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Reporter</p>
-                      <p className="text-sm font-bold text-slate-800">{ticket.profiles?.full_name || "Unknown User"}</p>
-                      <p className="text-xs font-semibold text-slate-500">Email :{ticket.profiles?.email || "-"}</p>
-                      <p className="text-xs font-semibold text-slate-500">Department :{ticket.profiles?.department || "-"}</p>
+                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Reporter</p>
+                      <p className="text-[14px] font-bold text-slate-800">{ticket.profiles?.full_name|| "Unknown User"}</p>
+                      <p className="text-[11px] font-semibold text-slate-500">EXT :{ticket.profiles?.extension|| "-"}</p>
+                      <p className="text-[11px] font-semibold text-slate-500">Email :{ticket.profiles?.email || "-"}</p>
+                      <p className="text-[11px] font-semibold text-slate-500">Department :{ticket.profiles?.department || "-"}</p>
                    </div>
                 </div>
                 
@@ -213,7 +212,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                 <div className="space-y-2">
                    <div className="flex justify-between items-center">
                       <p className="text-[11px] font-bold text-slate-400 uppercase">Phone Number</p>
-                      <p className="text-[13px] font-bold text-slate-700">{ticket.phone_number || "-"}</p>
+                      <p className="text-[13px] font-bold text-foreground">{ticket.phone_number || "-"}</p>
                    </div>
                    {ticket.phone_number && (
                      <Button asChild className="w-full bg-primary hover:bg-primary/50 text-white rounded-xl h-9 text-xs font-bold gap-2">
