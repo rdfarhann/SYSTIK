@@ -116,15 +116,13 @@ export default function ProfileForm({
           Save Changes
         </Button>
       </form>
-
-      {/* KOLOM KANAN - FOTO PROFIL */}
       <div className="bg-background p-8 rounded-[2.5rem] border border-slate-200 shadow-sm text-center">
         <div className="flex flex-col items-center">
           <div 
             className="relative cursor-pointer group" 
             onClick={() => !loading && fileInputRef.current?.click()}
           >
-            {/* Wadah Lingkaran Foto - Dibuat Tengah */}
+
             <div className="h-32 w-32 rounded-full border-2 border-slate-200 overflow-hidden bg-slate-50 flex items-center justify-center ring-4 ring-slate-50 shadow-inner transition-all group-hover:ring-primary/10">
               {previewUrl ? (
                 <img src={previewUrl} alt="Avatar" className="h-full w-full object-cover" />
@@ -133,14 +131,12 @@ export default function ProfileForm({
               )}
             </div>
 
-            {/* Loading Overlay */}
             {loading && (
               <div className="absolute inset-0 bg-white/60 rounded-full flex items-center justify-center backdrop-blur-sm">
                 <Loader2 className="h-8 w-8 text-primary animate-spin" />
               </div>
             )}
 
-            {/* Camera Icon - Posisi Sudut */}
             <div className="absolute bottom-1 right-1 bg-primary p-2 rounded-full shadow-lg border-4 border-white group-hover:scale-110 transition-transform">
               <Camera className="h-4 w-4 text-white" />
             </div>

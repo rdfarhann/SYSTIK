@@ -14,7 +14,7 @@ import {
   Activity,
   LucideIcon 
 } from "lucide-react"
-import { Ticket } from "../../../../.next/dev/types/ticket" 
+import { Ticket } from "@/types/ticket" 
 import Link from "next/link"
 
 interface TicketLog {

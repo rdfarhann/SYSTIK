@@ -2,10 +2,8 @@ import { NextResponse } from "next/server"
 import { createSupabaseServer } from "@/lib/supabase/server"
 
 export async function GET() {
-  // ✅ Gunakan Supabase server client
-  const supabase = await createSupabaseServer()
 
-  // ✅ Ambil user dari session Supabase
+  const supabase = await createSupabaseServer()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -17,7 +15,7 @@ export async function GET() {
     )
   }
 
-  // ✅ Ambil profile dari table "profiles"
+
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("id, full_name, employee_id, department, avatar_url")

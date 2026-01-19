@@ -39,7 +39,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     setError("")
 
     try {
-      // 1. Proses Login Utama
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -52,7 +51,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       }
 
       if (authData.user) {
-        // 2. Kueri Role dari tabel profiles
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
@@ -61,12 +59,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
         if (profileError) {
           console.error("Error fetching profile:", profileError)
-          // Default redirect jika profile tidak ditemukan
           window.location.href = "/dashboard"
           return
         }
 
-        // 3. Pengalihan berdasarkan Role
         router.refresh()
         
         setTimeout(() => {

@@ -39,8 +39,6 @@ export default async function UserManagementPage() {
 
   return (
     <section className="flex flex-1 flex-col gap-6 p-4 md:p-8 max-w-6xl mx-auto w-full">
-      
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-100 pb-6">
         <div className="flex items-center gap-4">
           <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-2xl text-primary shadow-sm border border-primary/20 shrink-0">
@@ -71,7 +69,6 @@ export default async function UserManagementPage() {
         </div>
       </div>
 
-      {/* Stats Quick Overview (Optional but Professional) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
           <p className="text-[9px] font-black text-slate-400 uppercase">Administrator</p>
@@ -87,14 +84,12 @@ export default async function UserManagementPage() {
         </div>
       </div>
 
-      {/* Table Container */}
       <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="overflow-x-auto">
           <UserListTable users={allUsers || []} />
         </div>
       </div>
-
-      {/* Footer Info */}
+      
       <div className="flex items-center justify-center gap-2 py-4">
         <div className="h-1 w-1 rounded-full bg-slate-300" />
         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">

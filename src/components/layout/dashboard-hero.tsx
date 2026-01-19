@@ -10,15 +10,12 @@ interface DashboardHeroProps {
 export default function DashboardHero({ userName }: DashboardHeroProps) {
   return (
     <div className="relative overflow-hidden bg-white border border-slate-200 rounded-[2rem] p-8 md:p-10 shadow-sm transition-all hover:border-emerald-200/50">
-      {/* Dekorasi Latar Belakang Subtle */}
       <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none">
         <LayoutDashboard className="h-64 w-64 -rotate-12 translate-x-12 -translate-y-12" />
       </div>
 
       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
         <div className="space-y-4">
-          {/* Badge Selamat Datang */}
-
           <div className="space-y-1">
             <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground uppercase">
               Welcome back, <span className="text-primary">{userName}</span>!

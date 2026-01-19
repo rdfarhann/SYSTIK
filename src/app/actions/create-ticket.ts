@@ -2,9 +2,9 @@
 
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
-import { CreateTicketInput } from "../../../.next/dev/types/ticket"
+import { Ticket } from "@/types/ticket"
 
-export async function createTicket(formData: CreateTicketInput, base64Image?: string) {
+export async function createTicket(formData: Ticket, base64Image?: string) {
   const supabase = await createSupabaseServer()
   
   const { data: { user } } = await supabase.auth.getUser()
@@ -12,7 +12,7 @@ export async function createTicket(formData: CreateTicketInput, base64Image?: st
 
   let publicUrl = null;
 
-  // 1. Logika Upload Gambar ke Supabase Storage
+ 
   if (base64Image && base64Image.includes("base64")) {
     const fileName = `${user.id}/${Date.now()}.png`;
     const buffer = Buffer.from(base64Image.split(",")[1], 'base64');
@@ -30,10 +30,10 @@ export async function createTicket(formData: CreateTicketInput, base64Image?: st
     publicUrl = data.publicUrl;
   }
 
-  // 2. Generate Nomor Tiket
+
   const ticketNo = `T-${new Date().getFullYear().toString().slice(-2)}${Math.floor(1000 + Math.random() * 9000)}`
 
-  // 3. Simpan ke Tabel Tickets
+
   const { data: ticketData, error: ticketError } = await supabase
     .from("tickets")
     .insert([{
@@ -51,12 +51,12 @@ export async function createTicket(formData: CreateTicketInput, base64Image?: st
 
   if (ticketError) return { success: false, error: ticketError.message }
 
-  // 4. Tambahkan Notifikasi (Memastikan RLS terlewati dengan user_id yang benar)
+
   await supabase.from("notifications").insert([{
     user_id: user.id,
     ticket_id: ticketData.id,
-    title: "Tiket Terkirim",
-    message: `Tiket ${ticketNo} berhasil dibuat.`,
+    title: "Ticket Sent",
+    message: `Ticket ${ticketNo} successfully created.`,
     is_read: false
   }]);
 

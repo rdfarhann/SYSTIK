@@ -39,7 +39,6 @@ export function AppSidebar({ userProfile }: AppSidebarProps) {
 
   return (
     <Sidebar className="w-64 bg-sidebar text-background border-r-0 shadow-xl">
-      {/* ================= HEADER ================= */}
       <SidebarHeader className="border-b border-white/10">
         <div className="flex items-center gap-3 px-3 py-4">
           <div className="bg-white/10 p-1.5 rounded-xl shadow-lg border border-white/10 shrink-0">
@@ -57,8 +56,6 @@ export function AppSidebar({ userProfile }: AppSidebarProps) {
           </div>
         </div>
       </SidebarHeader>
-
-      {/* ================= CONTENT ================= */}
       <SidebarContent className="px-3">
         <SidebarMenu className="gap-1">
           

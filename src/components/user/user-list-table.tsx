@@ -33,13 +33,11 @@ export default function UserListTable({ users }: { users: User[] }) {
   
   const handleEdit = (id: string) => {
     console.log("Edit user:", id)
-    // Tambahkan logika navigasi atau buka modal di sini
   }
 
   const handleDelete = (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus user ini?")) {
       console.log("Delete user:", id)
-      // Tambahkan logika delete API di sini
     }
   }
 

@@ -49,7 +49,7 @@ export default async function UserDashboardPage({
         
         {ticketsError ? (
           <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4" /> Gagal memuat data tiket.
+            <AlertTriangle className="h-4 w-4" /> Failed to load ticket data.
           </div>
         ) : recentTickets.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 bg-white rounded-3xl border border-dashed border-slate-200 text-center">

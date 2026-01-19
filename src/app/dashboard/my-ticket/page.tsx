@@ -12,7 +12,7 @@ import {
   Plus
 } from "lucide-react"
 
-// Patokan Desain Admin: Fungsi Style Prioritas
+
 const getPriorityStyle = (priority: string) => {
   switch (priority?.toUpperCase()) {
     case 'URGENT': return "text-red-600 bg-red-50 border-red-100"
@@ -21,7 +21,6 @@ const getPriorityStyle = (priority: string) => {
   }
 }
 
-// Patokan Desain Admin: Komponen Badge Status
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     OPEN: "bg-emerald-50 text-emerald-700 border-emerald-100",

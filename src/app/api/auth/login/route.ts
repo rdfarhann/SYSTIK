@@ -5,7 +5,6 @@ export async function POST(req: Request) {
   const { email, password } = await req.json()
   const supabase = await createSupabaseServer()
 
-  // 1. Proses Sign In
   const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -13,12 +12,12 @@ export async function POST(req: Request) {
 
   if (authError || !authData.user) {
     return NextResponse.json(
-      { error: "Email atau password salah" },
+      { error: "Incorrect email or password" },
       { status: 401 }
     )
   }
 
-  // 2. Ambil Role dari tabel Profiles sesuai ERD
+
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
@@ -27,17 +26,16 @@ export async function POST(req: Request) {
 
   if (profileError || !profile) {
     return NextResponse.json(
-      { error: "Profil tidak ditemukan" },
+      { error: "Profile not found" },
       { status: 404 }
     )
   }
 
-  // 3. Tentukan tujuan redirect
   const redirectTo = profile.role === "ADMIN" ? "/dashboard/admin" : "/dashboard"
 
   return NextResponse.json({
     success: true,
-    redirectTo, // Kirim URL tujuan ke frontend
+    redirectTo, 
     user: {
       id: authData.user.id,
       email: authData.user.email,
