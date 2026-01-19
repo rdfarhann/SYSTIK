@@ -4,7 +4,7 @@ import { useState, useRef, ChangeEvent } from "react"
 import { User, Mail, Building2, PhoneForwarded, Camera, Loader2, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
-import { UserProfile } from "../../../.next/dev/types/profile"
+import { UserProfile } from "@/types/ticket"
 
 export default function ProfileForm({ 
   profile, 

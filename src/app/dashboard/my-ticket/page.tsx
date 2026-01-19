@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { Ticket as TicketType } from "../../../../.next/dev/types/ticket"
+import { Ticket as TicketType } from "@/types/ticket"
 import { 
   Ticket as TicketIcon, 
   Clock, 

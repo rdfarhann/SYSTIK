@@ -3,6 +3,18 @@ export type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'CLOSED' | 'CANCELED';
 export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 
 
+
+export interface UserProfile {
+  id: string;
+  full_name: string;
+  email?: string;
+  department:string;
+  extension:string;
+  role: 'ADMIN' | 'USER';
+  avatar_url?: string | null;
+  updated_at?: string;
+}
+
 export interface Ticket {
   id: string; 
   created_at: string;
