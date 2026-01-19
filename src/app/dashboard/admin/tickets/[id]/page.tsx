@@ -182,8 +182,15 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
               <div className="relative">
                 <div className="absolute -left-[23px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-slate-300" />
                 <p className="text-[13px] font-medium text-slate-500">Ticket Created</p>
-                <time className="text-[11px] text-slate-400 font-medium">
-                   {new Date(ticket.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                <time className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                          {new Date(ticket.created_at).toLocaleString('id-ID', { 
+                            day: 'numeric', 
+                            month: 'short', 
+                            year: 'numeric',
+                            hour: '2-digit', 
+                            minute: '2-digit',
+                            hour12: false 
+                          })}
                 </time>
               </div>
             </div>

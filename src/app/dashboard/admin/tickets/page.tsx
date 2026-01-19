@@ -167,11 +167,16 @@ export default async function TicketsPage({
                   <div className="space-y-2 min-w-[100px]">
                     <div className="flex items-center gap-2 text-slate-500">
                       <Clock className="h-3.5 w-3.5 text-slate-400" />
-                      <span className="text-[10px] font-bold uppercase">
-                        {new Date(ticket.created_at).toLocaleDateString('id-ID', {
-                          day: 'numeric', month: 'short', year: 'numeric'
-                        })}
-                      </span>
+                      <time className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                          {new Date(ticket.created_at).toLocaleString('id-ID', { 
+                            day: 'numeric', 
+                            month: 'short', 
+                            year: 'numeric',
+                            hour: '2-digit', 
+                            minute: '2-digit',
+                            hour12: false 
+                          })}
+                    </time>
                     </div>
                     <div className="flex items-center gap-1 text-primary group-hover:gap-2 transition-all">
                        <span className="text-[10px] font-black uppercase tracking-widest italic underline underline-offset-4">Progress Details</span>

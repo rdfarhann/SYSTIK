@@ -119,7 +119,12 @@ export default async function AdminDashboardPage({
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                          {new Date(log.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          {new Date(log.created_at).toLocaleString('id-ID', { 
+                            day: 'numeric', 
+                            month: 'short', 
+                            year: 'numeric',
+                            hour12: false 
+                          })}
                         </p>
                         <span className="text-[9px] font-mono font-black text-primary px-2 py-0.5 bg-primary/5 rounded border border-primary/10">
                           ID: #{log.ticket_id}

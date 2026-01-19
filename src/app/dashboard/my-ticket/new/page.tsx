@@ -115,7 +115,6 @@ export default function NewTicketPage() {
 
       <Card className="p-5 sm:p-8 border-slate-200 shadow-xl shadow-slate-200/50 rounded-[1.5rem] sm:rounded-[2.5rem] bg-white border-none">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-          {/* SUBJECT - FULL WIDTH */}
           <div className="space-y-2">
             <label className="text-sm font-bold text-slate-700 ml-1 uppercase tracking-wider text-[11px]">Subject</label>
             <Input name="title" required className="rounded-xl sm:rounded-2xl border-slate-200 h-11 sm:h-12 text-sm focus:ring-primary/20 shadow-sm" placeholder="E.g Printer Ruang IT Macet" />

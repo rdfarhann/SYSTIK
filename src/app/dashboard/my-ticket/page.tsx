@@ -141,11 +141,14 @@ export default async function MyTicketsPage() {
                     </div>
                     <div className="flex items-center gap-2 text-slate-500">
                       <Clock className="h-3.5 w-3.5 text-slate-400" />
-                      <span className="text-[10px] font-bold uppercase">
-                        {new Date(ticket.created_at).toLocaleDateString('id-ID', {
-                          day: 'numeric', month: 'short', year: 'numeric'
-                        })}
-                      </span>
+                      <time className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                          {new Date(ticket.created_at).toLocaleString('id-ID', { 
+                            day: 'numeric', 
+                            month: 'short', 
+                            year: 'numeric',
+                            hour12: false 
+                          })}
+                      </time>
                     </div>
                   </div>
 
