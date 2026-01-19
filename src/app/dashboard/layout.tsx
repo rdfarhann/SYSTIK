@@ -17,6 +17,8 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
+import { DynamicHeader } from "@/components/layout/dynamic-header"
+
 
 export default async function DashboardLayout({ 
   children 
@@ -74,7 +76,7 @@ export default async function DashboardLayout({
             <div className="flex items-center gap-2">
               <SidebarTrigger className="bg-background text-foreground hover:bg-slate-100 border hover:text-foreground border-transparent hover:border-slate-200 transition-all outline-none"/>
               <Separator orientation="vertical" className="h-4 mx-1" />
-              <DynamicBreadcrumb />
+              <DynamicHeader />
             </div>
 
             <div className="flex items-center gap-3">
