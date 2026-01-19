@@ -1,8 +1,7 @@
 "use client"
 
-import React from "react"
 import Link from "next/link"
-import { PlusCircle } from "lucide-react"
+import { Plus, LayoutDashboard } from "lucide-react"
 
 interface DashboardHeroProps {
   userName: string
@@ -10,30 +9,39 @@ interface DashboardHeroProps {
 
 export default function DashboardHero({ userName }: DashboardHeroProps) {
   return (
-    <div className="relative overflow-hidden bg-primary rounded-3xl p-8 text-white shadow-lg">
-      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Welcome to SYSTIK, {userName}! 👋
-          </h1>
-          <p className="text-emerald-50 opacity-90 max-w-xl text-sm md:text-base">
-            Need technical assistance? Our IT team is ready to assist you.
-            Click the button next to create a new support request.
-          </p>
-        </div>
-        
-        <Link 
-          href="/dashboard/my-ticket/new" 
-          className="flex items-center justify-center gap-2 bg-white text-primary px-6 py-3 rounded-2xl font-bold hover:bg-emerald-50 transition-all shadow-sm shrink-0 active:scale-95"
-        >
-          <PlusCircle className="h-5 w-5" />
-          Create New Ticket
-        </Link>
+    <div className="relative overflow-hidden bg-white border border-slate-200 rounded-[2rem] p-8 md:p-10 shadow-sm transition-all hover:border-emerald-200/50">
+      {/* Dekorasi Latar Belakang Subtle */}
+      <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none">
+        <LayoutDashboard className="h-64 w-64 -rotate-12 translate-x-12 -translate-y-12" />
       </div>
 
-      {/* Dekorasi Estetik Background */}
-      <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 h-64 w-64 bg-white/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 translate-y-12 -translate-x-12 h-40 w-40 bg-black/5 rounded-full blur-2xl"></div>
+      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+        <div className="space-y-4">
+          {/* Badge Selamat Datang */}
+
+          <div className="space-y-1">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground uppercase">
+              Welcome back, <span className="text-primary">{userName}</span>!
+            </h1>
+            <p className="text-slate-500 max-w-lg text-xs md:text-sm font-medium leading-relaxed italic">
+              Need technical assistance? Our IT team is ready to assist you. 
+              Submit a new request and we`ll get back to you shortly.
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+          <Link 
+            href="/dashboard/my-ticket/new" 
+            className="flex items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] hover:bg-primary/50 transition-all shadow-xl shadow-slate-200 active:scale-95 w-full sm:w-auto"
+          >
+            <Plus className="h-4 w-4" />
+            Create New Ticket
+          </Link>
+          
+          <div className="hidden lg:block h-12 w-px bg-slate-100 mx-2" />
+        </div>
+      </div>
     </div>
   )
 }

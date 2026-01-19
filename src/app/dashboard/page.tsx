@@ -66,7 +66,7 @@ export default async function UserDashboardPage({
               >
                 <div className="flex items-center gap-4 min-w-0">
                   <div className={`h-2 w-2 rounded-full shrink-0 ${ticket.status?.toUpperCase() === 'OPEN' ? 'bg-blue-500' :
-                    ticket.status?.toUpperCase() === 'IN_PROGRESS' ? 'bg-amber-500' :
+                    ticket.status?.toUpperCase() === 'IN PROGRESS' ? 'bg-amber-500' :
                       'bg-primary'
                     }`} />
                   <div className="min-w-0">

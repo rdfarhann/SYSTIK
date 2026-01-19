@@ -189,41 +189,56 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
             </div>
           </Card>
           <Card className="p-5 rounded-2xl border-slate-200 shadow-sm bg-slate-50/50">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                   <div className="h-15 w-15 rounded-full bg-primary overflow-hidden flex items-center justify-center text-white shadow-md">
-                      {ticket.profiles?.avatar_url ? (
-                        <img src={ticket.profiles.avatar_url} className="h-full w-full object-cover" />
-                      ) : (
-                        <User className="h-5 w-5" />
-                      )}
-                   </div>
-                   <div>
-                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Reporter</p>
-                      <p className="text-[14px] font-bold text-slate-800">{ticket.profiles?.full_name|| "Unknown User"}</p>
-                      <p className="text-[11px] font-semibold text-slate-500">EXT :{ticket.profiles?.extension|| "-"}</p>
-                      <p className="text-[11px] font-semibold text-slate-500">Email :{ticket.profiles?.email || "-"}</p>
-                      <p className="text-[11px] font-semibold text-slate-500">Department :{ticket.profiles?.department || "-"}</p>
-                   </div>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-full bg-primary overflow-hidden flex items-center justify-center text-white shadow-md shrink-0">
+                  {ticket.profiles?.avatar_url ? (
+                    <img src={ticket.profiles.avatar_url} className="h-full w-full object-cover" alt="Avatar" />
+                  ) : (
+                    <User className="h-6 w-6" />
+                  )}
                 </div>
-                
-                <Separator className="bg-slate-200/60" />
-
-                <div className="space-y-2">
-                   <div className="flex justify-between items-center">
-                      <p className="text-[11px] font-bold text-slate-400 uppercase">Phone Number</p>
-                      <p className="text-[13px] font-bold text-foreground">{ticket.phone_number || "-"}</p>
-                   </div>
-                   {ticket.phone_number && (
-                     <Button asChild className="w-full bg-primary hover:bg-primary/50 text-white rounded-xl h-9 text-xs font-bold gap-2">
-                       <a href={`https://wa.me/62${ticket.phone_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">
-                         <Phone className="h-3.5 w-3.5" />
-                         Contact Via WhatsApp
-                       </a>
-                     </Button>
-                   )}
+                <div>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Reporter</p>
+                  <p className="text-sm font-bold text-slate-800 leading-tight">
+                    {ticket.profiles?.full_name || "Unknown User"}
+                  </p>
+                  <p className="text-[11px] font-semibold text-slate-500">
+                    Email: {ticket.profiles?.email || "-"}
+                  </p>
                 </div>
               </div>
+
+              <Separator className="bg-slate-200/60" />
+
+              <div className="space-y-2 text-[11px] font-semibold text-slate-500">
+                <div className="flex justify-between">
+                  <span>Department</span>
+                  <span className="text-slate-700">{ticket.profiles?.department || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Extension</span>
+                  <span className="text-slate-700">{ticket.profiles?.extension || "-"}</span>
+                </div>
+              </div>
+
+              <Separator className="bg-slate-200/60" />
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase">Phone Number</p>
+                  <p className="text-[13px] font-bold text-foreground">{ticket.phone_number || "-"}</p>
+                </div>
+                {ticket.phone_number && (
+                  <Button asChild className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl h-9 text-xs font-bold gap-2">
+                    <a href={`https://wa.me/62${ticket.phone_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">
+                      <Phone className="h-3.5 w-3.5" />
+                      Contact Via WhatsApp
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </div>
           </Card>
         </div>
       </div>

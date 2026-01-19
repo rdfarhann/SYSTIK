@@ -1,17 +1,34 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { Ticket as TicketIcon, AlertTriangle, MessageCircle, User as UserIcon, Building2 } from "lucide-react"
+import { 
+  Ticket as TicketIcon, 
+  MessageCircle, 
+  User as UserIcon, 
+  Building2, 
+  Clock, 
+  ChevronRight,
+  AlertCircle,
+  ShieldCheck
+} from "lucide-react"
 import { redirect } from "next/navigation"
-import { Ticket } from "../../../../../.next/dev/types/ticket"
 import TicketSearch from "@/components/tickets/search-ticket"
+
+
+const getPriorityStyle = (priority: string) => {
+  switch (priority?.toUpperCase()) {
+    case 'URGENT': return "text-red-600 bg-red-50 border-red-100"
+    case 'HIGH': return "text-orange-600 bg-orange-50 border-orange-100"
+    default: return "text-slate-500 bg-slate-50 border-slate-100"
+  }
+}
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    OPEN: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    CLOSED: "bg-slate-100 text-slate-600 border-slate-200",
-    IN_PROGRESS: "bg-blue-100 text-blue-700 border-blue-200",
-    CANCELLED: "bg-amber-100 text-amber-700 border-amber-200",
-    CANCELED: "bg-amber-100 text-amber-700 border-amber-200",
+    OPEN: "bg-emerald-50 text-emerald-700 border-emerald-100",
+    CLOSED: "bg-slate-50 text-slate-600 border-slate-100",
+    IN_PROGRESS: "bg-blue-50 text-blue-700 border-blue-100",
+    CANCELLED: "bg-ambera-50 text-amber-700 border-amber-100",
+    CANCELED: "bg-amber-50 text-amber-700 border-amber-100",
   }
 
   return (
@@ -45,10 +62,7 @@ export default async function TicketsPage({
     `)
     .order("created_at", { ascending: false });
 
-
-  if (statusFormatted) {
-    query = query.eq("status", statusFormatted);
-  }
+  if (statusFormatted) query = query.eq("status", statusFormatted);
 
   if (q) {
     const searchAsNumber = parseInt(q);
@@ -59,116 +73,131 @@ export default async function TicketsPage({
     }
   }
   
-  const { data: ticketsData, error: ticketsError } = await query;
+  const { data: ticketsData } = await query;
+  const allTickets = ticketsData || [];
 
-  let allTickets = (ticketsData as (Ticket & { 
-    profiles: { 
-      full_name: string;
-      department: string; 
-    } | null
-  })[]) || [];
-
-  if (q && isNaN(parseInt(q))) {
-    allTickets = allTickets.filter(ticket => 
-      ticket.profiles?.full_name?.toLowerCase().includes(q.toLowerCase()) ||
-      ticket.title?.toLowerCase().includes(q.toLowerCase()) ||
-      ticket.description?.toLowerCase().includes(q.toLowerCase())
-    );
-  }
-  
   const pageTitle = status && status !== "all"
     ? status.replace("-", " ").toUpperCase() 
     : "ALL TICKETS";
 
   return (
-    <section className="flex flex-1 flex-col gap-6 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
-      <div className="flex items-center gap-4">
-        <div className="bg-primary flex h-12 w-12 items-center justify-center rounded-xl border shadow-md shrink-0">
-          <TicketIcon className="h-6 w-6 text-primary-foreground" />
+    <section className="flex flex-1 flex-col gap-6 p-4 md:p-8 max-w-6xl mx-auto w-full">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-100 pb-6">
+        <div className="flex items-center gap-4">
+          <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-2xl text-primary shadow-sm border border-primary/20 shrink-0">
+            <TicketIcon className="h-7 w-7" />
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-black uppercase tracking-tight leading-none">
+                {pageTitle}
+              </h1>
+              <span className="hidden sm:flex items-center gap-1 bg-primary/5 text-primary text-[9px] font-black px-2 py-0.5 rounded-full border border-primary/10 uppercase tracking-widest">
+                <ShieldCheck className="h-2.5 w-2.5" />
+                Database View
+              </span>
+            </div>
+            <p className="text-[10px] text-muted-foreground font-bold tracking-[0.2em] uppercase opacity-70">
+              Ticket Management System
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-black tracking-tighter uppercase leading-none">
-            {pageTitle}
-          </h1>
-          <p className="text-[10px] text-muted-foreground font-bold opacity-80 uppercase tracking-widest mt-1">
-            Database Management System
-          </p>
+        
+        <div className="flex items-center gap-3">
+          <div className="hidden lg:block text-right pr-4 border-r border-slate-200">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Total Requests</p>
+            <p className="text-xl font-black text-primary leading-none">{allTickets.length}</p>
+          </div>
+          <TicketSearch />
         </div>
       </div>
-      
-      <TicketSearch />
-      
-      {ticketsError && (
-        <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-center gap-3 text-red-800">
-          <AlertTriangle className="h-5 w-5" />
-          <p className="text-xs font-medium">Database Error: {ticketsError.message}</p>
-        </div>
-      )}
-      
-      <div className="grid gap-4">
-          {allTickets.length > 0 ? (
-            allTickets.map((ticket) => (
-              <div key={ticket.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-primary/20 transition-all group animate-in fade-in slide-in-from-bottom-3 duration-500">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-primary">
-                        #{ticket.id}
-                      </span>
-                      <span className="text-slate-300">•</span>
-                      
-                      <div className="flex items-center gap-1">
-                        <UserIcon className="h-3 w-3 text-slate-400" />
-                        <span className="text-[10px] font-bold uppercase tracking-tight text-slate-500">
-                          {ticket.profiles?.full_name || "Guest"}
-                        </span>
-                      </div>
-                      <span className="text-slate-300">•</span>
-                      <div className="flex items-center gap-1 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
-                        <Building2 className="h-3 w-3 text-primary/60" />
-                        <span className="text-[9px] font-black uppercase tracking-tight text-primary/80">
-                          {ticket.profiles?.department || "General"}
-                        </span>
-                      </div>
-                    </div>
-                    <h3 className="font-bold text-slate-900 leading-tight group-hover:text-primary transition-colors">
-                      {ticket.title || "No Title"}
-                    </h3>
-                  </div>
-                  <StatusBadge status={ticket.status} />
-                </div>
+
+      <div className="grid gap-3">
+        {allTickets.length > 0 ? (
+          allTickets.map((ticket) => (
+            <Link 
+              key={ticket.id} 
+              href={`/dashboard/admin/tickets/${ticket.id}`}
+              className="group block bg-white border border-slate-200 rounded-2xl p-5 hover:border-primary/30 hover:shadow-md transition-all animate-in fade-in slide-in-from-bottom-2 duration-500"
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 
-                <p className="text-sm text-slate-600 line-clamp-2 mb-4 italic font-medium">
-                  {"\""}{ticket.description}{"\""}
-                </p>
-                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                  <div className="flex items-center gap-2 text-slate-400 font-medium">
-                    <MessageCircle className="h-3.5 w-3.5" />
-                    <span className="text-[11px]">
-                      {new Date(ticket.created_at).toLocaleDateString('id-ID', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                    <span className="text-[10px] font-mono font-black text-primary bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+                      #{ticket.id}
                     </span>
+                    <StatusBadge status={ticket.status} />
+                    {ticket.priority && (
+                      <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-wider ${getPriorityStyle(ticket.priority)}`}>
+                        <AlertCircle className="h-2.5 w-2.5" />
+                        {ticket.priority}
+                      </span>
+                    )}
                   </div>
-                  <Link 
-                    href={`/dashboard/admin/tickets/${ticket.id}`}
-                    className="text-xs font-black text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
-                  >
-                    Progress Details →
-                  </Link>
+                  
+                  <h3 className="text-lg font-bold text-slate-900 truncate group-hover:text-primary transition-colors leading-snug">
+                    {ticket.title}
+                  </h3>
+                  
+                  <p className="text-sm text-slate-500 line-clamp-1 mt-1 font-medium italic">
+                    {ticket.description}
+                  </p>
                 </div>
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 md:border-l md:pl-6 border-slate-100">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <div className="bg-slate-100 p-1 rounded">
+                        <UserIcon className="h-3 w-3 text-slate-500" />
+                      </div>
+                      <span className="text-xs font-bold truncate max-w-[140px]">
+                        {ticket.profiles?.full_name || "Guest"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <div className="bg-slate-100 p-1 rounded">
+                        <Building2 className="h-3 w-3 text-slate-500" />
+                      </div>
+                      <span className="text-[10px] uppercase font-black tracking-tight text-slate-400">
+                        {ticket.profiles?.department || "General"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 min-w-[100px]">
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <Clock className="h-3.5 w-3.5 text-slate-400" />
+                      <span className="text-[10px] font-bold uppercase">
+                        {new Date(ticket.created_at).toLocaleDateString('id-ID', {
+                          day: 'numeric', month: 'short', year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-primary group-hover:gap-2 transition-all">
+                       <span className="text-[10px] font-black uppercase tracking-widest italic underline underline-offset-4">Progress Details</span>
+                       <ChevronRight className="h-3 w-3" />
+                    </div>
+                  </div>
+                </div>
+
               </div>
-            ))
-          ) : (
-            <div className="py-20 text-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
-              <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">
-                {q ? `No results found for "${q}"` : `No tickets found in ${pageTitle}`}
-              </p>
-            </div>
-          )}
-        </div>
+            </Link>
+          ))
+        ) : (
+          <div className="py-20 text-center bg-white rounded-3xl border border-dashed border-slate-200">
+            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em]">No tickets found in this section</p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center justify-center gap-2 py-4">
+        <div className="h-1 w-1 rounded-full bg-slate-300" />
+        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">
+          End of ticket database
+        </p>
+        <div className="h-1 w-1 rounded-full bg-slate-300" />
+      </div>
+
     </section>
   )
 }
