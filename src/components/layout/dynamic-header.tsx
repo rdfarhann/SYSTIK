@@ -22,7 +22,7 @@ export function DynamicHeader() {
     if (pathname.includes("/my-ticket")) {
       return { 
         title: isDetail ? `Ticket #${ticketId}` : "My Tickets", 
-        subtitle: isDetail ? "Conversation history" : "List of your requests" 
+        subtitle: isDetail ? "Detail ticket" : "List of your requests" 
       }
     }
     return { title: "Systik App", subtitle: "Support System" }
