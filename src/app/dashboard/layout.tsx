@@ -110,10 +110,10 @@ export default async function DashboardLayout({
                     <p className="text-sm font-bold truncate text-foreground">{user.email}</p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild className="p-0">
+                  <DropdownMenuItem asChild className="p-0 focus:bg-transparent">
                     <Link 
                       href="/dashboard/profile" 
-                      className="flex w-full items-center gap-2 px-2 py-2 text-sm text-foreground font-bold hover:bg-slate-200 rounded-md transition-colors"
+                      className="flex w-full items-center gap-2 px-2 py-2 text-sm text-foreground font-bold hover:bg-slate-300 rounded-md transition-colors"
                     >
                       <User className="h-4 w-4" />
                       Profile Settings
