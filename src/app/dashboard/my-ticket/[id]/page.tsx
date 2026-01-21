@@ -11,7 +11,8 @@ import {
   ExternalLink,
   Phone,
   Clock,
-  User
+  User,
+  XCircle
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
@@ -19,6 +20,10 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import TicketComments from "@/components/tickets/ticket-comments"
 import { FormattedDate } from "@/components/ui/formatted-date"
+
+// IMPORT KOMPONEN SLA
+import { SLAStatusBadge } from "@/components/tickets/sla-status-badge"
+import { SLACountdown } from "@/components/tickets/sla-countdown"
 
 interface TicketLog {
   id: string;
@@ -73,6 +78,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
       case "OPEN": return "bg-blue-100 text-blue-700 border-blue-200"
       case "IN_PROGRESS": return "bg-amber-100 text-amber-700 border-amber-200"
       case "CLOSED": return "bg-primary text-white border-primary"
+      case "CANCELED": return "bg-slate-100 text-slate-500 border-slate-200"
       default: return "bg-slate-100 text-slate-700"
     }
   }
@@ -85,6 +91,14 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
           <span className="text-xs font-bold uppercase tracking-wider">Back to List</span>
         </Link>
         <div className="flex items-center gap-2">
+          {/* BADGE SLA DI HEADER */}
+          {ticket.sla_deadline && (
+            <SLAStatusBadge 
+              deadline={ticket.sla_deadline} 
+              status={ticket.status} 
+              slaStatus={ticket.sla_status} 
+            />
+          )}
           <span className="text-[12px] font-mono bg-slate-100 px-2 py-1 rounded text-slate-500">
             ID: #{String(ticket.id).slice(0, 8)}
           </span>
@@ -175,6 +189,19 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
               <Clock className="h-3.5 w-3.5 text-primary" />
               Activity Log
             </h3>
+
+            {/* COUNTDOWN SLA DI SIDEBAR */}
+            {!(["CLOSED", "CANCELED"].includes(ticket.status)) && ticket.sla_deadline ? (
+              <div className="mb-6">
+                <SLACountdown deadline={ticket.sla_deadline} />
+              </div>
+            ) : ticket.status === "CANCELED" && (
+              <div className="mb-6 p-3 rounded-xl bg-slate-50 border border-dashed border-slate-200 flex items-center gap-3">
+                <XCircle className="h-4 w-4 text-slate-400" />
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">SLA Monitoring Stopped</span>
+              </div>
+            )}
+
             <div className="relative pl-6 space-y-5 before:absolute before:inset-0 before:left-[7px] before:h-full before:w-[1.5px] before:bg-slate-100">
               {logs.length > 0 ? logs.slice(0, 5).map((log: TicketLog, index: number) => (
                 <div key={log.id} className="relative">
@@ -184,8 +211,8 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                     {log.status_update}
                   </p>
                   <span className="text-[11px] font-medium text-slate-400">
-                   <FormattedDate date={log.created_at} />
-                 </span>
+                    <FormattedDate date={log.created_at} />
+                  </span>
                 </div>
               )) : (
                 <div className="relative">
@@ -197,11 +224,12 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                 <div className="absolute -left-[23px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-slate-300" />
                 <p className="text-[13px] font-medium text-slate-500">Ticket Created</p>
                 <span className="text-[11px] font-medium text-slate-400">
-                      <FormattedDate date={ticket.created_at} />
-               </span>
+                  <FormattedDate date={ticket.created_at} />
+                </span>
               </div>
             </div>
           </Card>
+          
           <Card className="p-5 rounded-2xl border-slate-200 shadow-sm bg-slate-50/50">
             <div className="space-y-4">
               <div className="flex items-center gap-3">

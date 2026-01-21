@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import { 
   ChevronLeft, Calendar, Tag, AlertCircle, FileText, 
-  Download, ExternalLink, Phone, Clock, User 
+  Download, ExternalLink, Phone, Clock, User, XCircle 
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
@@ -12,6 +12,8 @@ import { Separator } from "@/components/ui/separator"
 import StatusEditor from "@/components/tickets/status-editor"
 import TicketComments from "@/components/tickets/ticket-comments"
 import { FormattedDate } from "@/components/ui/formatted-date"
+import { SLAStatusBadge } from "@/components/tickets/sla-status-badge"
+import { SLACountdown } from "@/components/tickets/sla-countdown"
 
 interface TicketLog {
   id: string;
@@ -39,7 +41,6 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
 
   if (error || !ticket) notFound()
 
-
   const { data: commentsRaw } = await supabase
     .from("ticket_comments")
     .select(`*`)
@@ -66,6 +67,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
       case "OPEN": return "bg-blue-100 text-blue-700 border-blue-200"
       case "IN_PROGRESS": return "bg-amber-100 text-amber-700 border-amber-200"
       case "CLOSED": return "bg-primary text-white border-primary"
+      case "CANCELED": return "bg-slate-100 text-slate-500 border-slate-200"
       default: return "bg-slate-100 text-slate-700"
     }
   }
@@ -78,12 +80,21 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
           <span className="text-xs font-bold uppercase tracking-wider">Back to Admin List</span>
         </Link>
         <div className="flex items-center gap-2">
+           {/* SLA Status Badge dengan pengecekan deadline */}
+           {ticket.sla_deadline && (
+             <SLAStatusBadge 
+                deadline={ticket.sla_deadline} 
+                status={ticket.status} 
+                slaStatus={ticket.sla_status} 
+             />
+           )}
            <span className="text-[12px] font-mono bg-slate-100 px-2 py-1 rounded text-slate-500">ID: #{String(ticket.id).slice(0, 8)}</span>
            <Badge className={`${getStatusColor(ticket.status)} border font-bold uppercase text-[10px] px-3`}>
              {ticket.status.replace('_', ' ')}
            </Badge>
         </div>
       </div>
+      
       <div className="space-y-3">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">{ticket.title}</h1>
         <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-slate-500">
@@ -101,11 +112,13 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
           </div>
         </div>
       </div>
-        <StatusEditor 
-          ticketId={ticket.id} 
-          initialStatus={ticket.status} 
-          ownerId={ticket.user_id} 
-        />
+
+      <StatusEditor 
+        ticketId={ticket.id} 
+        initialStatus={ticket.status} 
+        ownerId={ticket.user_id} 
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <div className="lg:col-span-8 space-y-5">
           <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden">
@@ -161,6 +174,17 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
               <Clock className="h-3.5 w-3.5 text-primary" />
               Activity Log
             </h3>
+            {!(["CLOSED", "CANCELED"].includes(ticket.status)) && ticket.sla_deadline ? (
+              <div className="mb-6">
+                <SLACountdown deadline={ticket.sla_deadline} />
+              </div>
+            ) : ticket.status === "CANCELED" && (
+              <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-dashed border-slate-200 flex items-center gap-3">
+                <XCircle className="h-4 w-4 text-slate-400" />
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">SLA Monitoring Stopped</span>
+              </div>
+            )}
+
             <div className="relative pl-6 space-y-5 before:absolute before:inset-0 before:left-[7px] before:h-full before:w-[1.5px] before:bg-slate-100">
               {logs.length > 0 ? logs.slice(0, 5).map((log: TicketLog, index: number) => (
                 <div key={log.id} className="relative">
@@ -191,6 +215,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
               </div>
             </div>
           </Card>
+          
           <Card className="p-5 rounded-2xl border-slate-200 shadow-sm bg-slate-50/50">
             <div className="space-y-4">
               <div className="flex items-center gap-3">

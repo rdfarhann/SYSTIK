@@ -3,7 +3,6 @@
 import { redirect } from "next/navigation"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { 
-  AlertTriangle, 
   ShieldCheck, 
   Ticket as TicketIcon, 
   Clock, 
@@ -70,7 +69,6 @@ export default async function AdminDashboardPage({
 
   return (
     <section className="flex flex-1 flex-col p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full bg-slate-50/30 min-h-screen">
-      {/* Header Overview - Presisi Tinggi */}
       <div className="bg-white border border-slate-200 p-5 rounded-[2rem] shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="bg-slate-100 p-3 rounded-2xl border border-primary/20 shrink-0">
@@ -83,7 +81,6 @@ export default async function AdminDashboardPage({
         </div>
       </div>
 
-      {/* Grid Stats - Perbaikan Responsivitas Mobile */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         <Link href="/dashboard/admin/tickets" className="transition-transform active:scale-95">
           <StatCard title="Total Tickets" value={stats.total} description="All time records" icon={TicketIcon} color="text-slate-900" bgColor="bg-slate-100" />
@@ -102,7 +99,6 @@ export default async function AdminDashboardPage({
         </Link>
       </div>
 
-      {/* Logs Section - Alignment Teks */}
       <div className="bg-white border border-slate-200 rounded-[2rem] shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-3 font-black uppercase tracking-tighter text-sm text-slate-900">

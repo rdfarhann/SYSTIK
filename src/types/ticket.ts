@@ -29,6 +29,9 @@ export interface Ticket {
     full_name: string;
     avatar_url?: string;
   };
+  sla_deadline: string;
+  sla_status: 'ON_TIME' | 'BREACHED';
+
 }
 
 export interface CreateTicketInput {
