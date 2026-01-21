@@ -88,7 +88,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
       <div className="flex items-center justify-between">
         <Link href="/dashboard/my-ticket" className="flex items-center gap-1 text-slate-500 hover:text-primary transition-colors group">
           <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-xs font-bold uppercase tracking-wider">Back to List</span>
+          <span className="text-xs font-bold uppercase tracking-wider">Back</span>
         </Link>
         <div className="flex items-center gap-2">
           {/* BADGE SLA DI HEADER */}
