@@ -2,7 +2,6 @@ import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { 
   Ticket as TicketIcon, 
-  MessageCircle, 
   User as UserIcon, 
   Building2, 
   Clock, 

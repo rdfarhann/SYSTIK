@@ -53,12 +53,25 @@ export default function NewTicketPage() {
       return
     }
     setLoading(true)
+    
     const formData = new FormData(e.currentTarget)
     if (!userData) {
       toast.error("Sesi berakhir. Silakan login kembali.")
       setLoading(false)
       return
     }
+
+    // --- 1. LOGIKA PERHITUNGAN SLA ---
+    const now = new Date();
+    let slaHours = 12; // Default
+    if (priority === "URGENT") slaHours = 2;
+    else if (priority === "HIGH") slaHours = 4;
+    else if (priority === "MEDIUM") slaHours = 12;
+    else if (priority === "LOW") slaHours = 24;
+
+    const slaDeadline = new Date(now.getTime() + (slaHours * 60 * 60 * 1000));
+    // ---------------------------------
+
     let attachmentUrl = null
     if (file) {
       const fileExt = file.name.split('.').pop()
@@ -67,6 +80,7 @@ export default function NewTicketPage() {
       const { error: uploadError } = await supabase.storage
         .from('ticket-attachments') 
         .upload(filePath, file)
+      
       if (uploadError) {
         toast.error("Gagal unggah gambar: " + uploadError.message)
         setLoading(false)
@@ -77,7 +91,11 @@ export default function NewTicketPage() {
         .getPublicUrl(filePath)
       attachmentUrl = publicUrl
     }
+
+    const ticketNo = `T-${new Date().getFullYear().toString().slice(-2)}${Math.floor(1000 + Math.random() * 9000)}`
+
     const ticketData = {
+      ticket_no: ticketNo,
       title: formData.get("title") as string,
       description: formData.get("description") as string,
       phone_number: formData.get("phone_number") as string,
@@ -86,13 +104,26 @@ export default function NewTicketPage() {
       status: "OPEN",
       user_id: userData.id,
       attachment_url: attachmentUrl,
-      created_at: new Date().toISOString(),
+      created_at: now.toISOString(),
+      // --- TAMBAHKAN DUA BARIS INI ---
+      sla_deadline: slaDeadline.toISOString(),
+      sla_status: "PENDING" // Pakai PENDING sesuai constraint DB Anda
     }
+
     const { error } = await supabase.from("tickets").insert([ticketData])
+
     if (error) {
       toast.error("Gagal mengirim tiket: " + error.message)
       setLoading(false)
     } else {
+      // Tambahkan notifikasi manual jika tidak pakai Server Action
+      await supabase.from("notifications").insert([{
+        user_id: userData.id,
+        title: "Ticket Sent",
+        message: `Ticket ${ticketNo} successfully created.`,
+        is_read: false
+      }]);
+
       toast.success("Tiket berhasil dibuat!")
       router.push("/dashboard/my-ticket")
       router.refresh()
@@ -101,16 +132,16 @@ export default function NewTicketPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-8 space-y-4 sm:space-y-6">
-      <div className="flex flex-col gap-1">    
-        <div className="flex items-center gap-2 sm:gap-3">
-           <div className="p-2 bg-primary rounded-lg sm:rounded-xl shrink-0">
-              <PlusCircle className="h-5 w-5 sm:h-6 sm:w-6 text-background" />
-           </div>
-           <div>
-              <h1 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 uppercase">Create New Ticket</h1>
-              <p className="text-[10px] sm:text-xs text-slate-500 font-medium">Complete details to get technical assistance.</p>
-           </div>
-        </div>
+       <div className="flex flex-col gap-1">    
+         <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-2 bg-primary rounded-lg sm:rounded-xl shrink-0">
+               <PlusCircle className="h-5 w-5 sm:h-6 sm:w-6 text-background" />
+            </div>
+            <div>
+               <h1 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 uppercase">Create New Ticket</h1>
+               <p className="text-[10px] sm:text-xs text-slate-500 font-medium">Complete details to get technical assistance.</p>
+            </div>
+         </div>
       </div>
 
       <Card className="p-5 sm:p-8 border-slate-200 shadow-xl shadow-slate-200/50 rounded-[1.5rem] sm:rounded-[2.5rem] bg-white border-none">
@@ -120,7 +151,7 @@ export default function NewTicketPage() {
             <Input name="title" required className="rounded-xl sm:rounded-2xl border-slate-200 h-11 sm:h-12 text-sm focus:ring-primary/20 shadow-sm" placeholder="E.g Printer Ruang IT Macet" />
           </div>
 
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-4 sm:space-y-6"> 
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 ml-1 uppercase tracking-wider text-[11px]">Category</label>
               <Select onValueChange={setCategory} required>
@@ -159,7 +190,6 @@ export default function NewTicketPage() {
               <Phone className="h-3 w-3 text-primary" /> Phone Mobile / WhatsApp
             </label>
             <Input type="tel" name="phone_number" placeholder="E.g 08123456789" required className="rounded-xl sm:rounded-2xl h-11 sm:h-12 text-sm border-slate-200 shadow-sm focus:ring-primary/20" />
-            <p className="text-[10px] text-slate-400 italic ml-1">* Technician will contact you via this number.</p>
           </div>
 
           <div className="space-y-2">
@@ -175,25 +205,19 @@ export default function NewTicketPage() {
                   <Paperclip className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 group-hover:text-primary" />
                 </div>
                 <span className="text-[10px] sm:text-xs font-bold text-slate-500 group-hover:text-primary">Click or drag image</span>
-                <span className="text-[9px] sm:text-[10px] text-slate-400 mt-1 uppercase">Max 5MB (PNG, JPG)</span>
                 <input type="file" className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} accept="image/*" />
               </label>
             ) : (
               <div className="flex items-center justify-between p-3 sm:p-4 bg-primary/5 border border-primary/20 rounded-xl sm:rounded-2xl">
-                <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
-                   <div className="p-2 bg-primary/10 rounded-lg shrink-0"><Paperclip className="h-4 w-4 text-primary" /></div>
-                   <span className="text-xs sm:text-sm text-primary font-bold truncate">{file.name}</span>
-                </div>
-                <Button type="button" variant="ghost" size="sm" onClick={() => setFile(null)} className="hover:bg-primary/10 text-primary h-8 w-8 p-0 rounded-full"><X className="h-4 w-4" /></Button>
+                <span className="text-xs sm:text-sm text-primary font-bold truncate">{file.name}</span>
+                <Button type="button" variant="ghost" size="sm" onClick={() => setFile(null)} className="h-8 w-8 p-0 rounded-full"><X className="h-4 w-4" /></Button>
               </div>
             )}
           </div>
 
-          <div className="pt-2 sm:pt-4">
-            <Button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary/90 text-white font-black py-6 sm:py-7 rounded-xl sm:rounded-[2rem] shadow-lg shadow-primary/20 active:scale-[0.98] text-sm uppercase tracking-widest">
-              {loading ? (<><Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />Sending...</>) : (<><Send className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />Submit Ticket</>)}
-            </Button>
-          </div>
+          <Button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary/90 text-white font-black py-6 sm:py-7 rounded-xl sm:rounded-[2rem] shadow-lg shadow-primary/20 text-sm uppercase tracking-widest">
+            {loading ? <Loader2 className="animate-spin" /> : "Submit Ticket"}
+          </Button>
         </form>
       </Card>
     </div>

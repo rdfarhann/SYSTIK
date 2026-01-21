@@ -9,8 +9,7 @@ interface SLAStatusBadgeProps {
 
 export function SLAStatusBadge({ deadline, status, slaStatus }: SLAStatusBadgeProps) {
   const isOverdue = new Date() > new Date(deadline);
-  
-  // Logic: Tiket yang tidak aktif (Selesai atau Batal)
+
   const isFinalStatus = status === "CLOSED" || status === "CANCELED";
 
   if (isFinalStatus) {
@@ -22,7 +21,6 @@ export function SLAStatusBadge({ deadline, status, slaStatus }: SLAStatusBadgePr
       );
     }
 
-    // Status CLOSED: Cek apakah mencapai target atau tidak
     const isAchieved = slaStatus === "ACHIEVED";
     return (
       <div className={`px-2 py-1 rounded text-[10px] font-bold border flex items-center gap-1 ${
@@ -36,7 +34,6 @@ export function SLAStatusBadge({ deadline, status, slaStatus }: SLAStatusBadgePr
     );
   }
 
-  // Status Aktif: OPEN / IN_PROGRESS
   return (
     <div className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold shadow-sm ${
       isOverdue 

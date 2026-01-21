@@ -154,18 +154,28 @@ export default async function AdminDashboardPage({
 
 function StatCard({ title, value, description, icon: Icon, color, bgColor }: { title: string, value: number, description: string, icon: LucideIcon, color: string, bgColor: string }) {
   return (
-    <div className="bg-white border border-slate-200 p-4 sm:p-6 rounded-[2rem] flex flex-col justify-between h-full shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex justify-between items-start mb-4">
-        <div className={`${bgColor} ${color} p-2 rounded-xl border border-slate-200/50 shrink-0`}>
-          <Icon className="h-4 w-4 sm:h-5 sm:w-5" /> 
+    <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between min-h-[120px] transition-all duration-200 hover:border-slate-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.03)] group">
+      <div className="flex items-center justify-between">
+        <div className={`p-2 rounded-lg ${bgColor} ${color} transition-colors`}>
+          <Icon className="h-4 w-4" />
         </div>
-        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-right leading-none pl-2">{title}</p>
+        <div className="flex items-center gap-1.5">
+          <div className={`h-1.5 w-1.5 rounded-full ${color.replace('text-', 'bg-')} animate-pulse`} />
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{title}</span>
+        </div>
       </div>
-      <div>
-        <h3 className="text-xl sm:text-2xl font-black tracking-tighter text-slate-900 leading-none">
-          {value.toLocaleString()}
-        </h3>
-        <p className="text-[9px] text-slate-400 mt-1.5 font-bold uppercase tracking-tight opacity-70 truncate">{description}</p>
+      <div className="mt-4">
+        <div className="flex items-baseline gap-1">
+          <h3 className="text-3xl font-black tracking-tighter text-slate-900 tabular-nums">
+            {value.toLocaleString()}
+          </h3>
+        </div>
+        
+        <div className="flex items-center gap-2 mt-1 pt-2 border-t border-slate-50">
+          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">
+            <span className="text-slate-600/60 font italic tracking-normal capitalize">{description}</span>
+          </p>
+        </div>
       </div>
     </div>
   )

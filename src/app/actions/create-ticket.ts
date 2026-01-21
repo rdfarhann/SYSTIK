@@ -2,37 +2,42 @@
 
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
-import { Ticket } from "@/types/ticket"
 
-export async function createTicket(formData: Ticket, base64Image?: string) {
+interface CreateTicketInput {
+  title: string;
+  description: string;
+  category: string;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  phone_number: string;
+}
+
+export async function createTicket(formData: CreateTicketInput, base64Image?: string) {
   const supabase = await createSupabaseServer()
   
+  // LOG 1: Cek data mentah yang masuk dari Form
+  console.log("--- DATA DITERIMA SERVER ---");
+  console.log("Priority dari Client:", formData.priority);
+  console.log("Title:", formData.title);
+
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: "Unauthorized" }
+  if (!user) return { success: false, error: "Auth failed" }
 
-  let publicUrl = null;
+  // LOG 2: Paksa Priority jika Undefined agar SLA tetap muncul
+  const validPriority = formData.priority ? formData.priority.toUpperCase() : "MEDIUM";
+  
+  const slaMapping: Record<string, number> = {
+    URGENT: 2,
+    HIGH: 4,
+    MEDIUM: 12,
+    LOW: 24,
+  };
 
- 
-  if (base64Image && base64Image.includes("base64")) {
-    const fileName = `${user.id}/${Date.now()}.png`;
-    const buffer = Buffer.from(base64Image.split(",")[1], 'base64');
+  const slaHours = slaMapping[validPriority] || 12;
+  const slaDeadline = new Date(Date.now() + slaHours * 60 * 60 * 1000);
 
-    const { error: uploadError } = await supabase.storage
-      .from('ticket-attachments')
-      .upload(fileName, buffer, { 
-        contentType: 'image/png',
-        upsert: true 
-      });
+  console.log("SLA Dihitung:", slaDeadline.toISOString());
 
-    if (uploadError) return { success: false, error: "Gagal upload: " + uploadError.message };
-
-    const { data } = supabase.storage.from('ticket-attachments').getPublicUrl(fileName);
-    publicUrl = data.publicUrl;
-  }
-
-
-  const ticketNo = `T-${new Date().getFullYear().toString().slice(-2)}${Math.floor(1000 + Math.random() * 9000)}`
-
+  const ticketNo = `T-${new Date().getFullYear().toString().slice(-2)}${Math.floor(1000 + Math.random() * 9000)}`;
 
   const { data: ticketData, error: ticketError } = await supabase
     .from("tickets")
@@ -41,25 +46,21 @@ export async function createTicket(formData: Ticket, base64Image?: string) {
       title: formData.title,
       description: formData.description,
       category: formData.category,
-      priority: formData.priority,
+      priority: validPriority, // Gunakan yang sudah divalidasi
+      phone_number: formData.phone_number,
       status: "OPEN",
       user_id: user.id,
-      attachment_url: publicUrl 
+      sla_deadline: slaDeadline.toISOString(), // INI HARUS MASUK
+      sla_status: "PENDING"
     }])
     .select()
-    .single()
+    .single();
 
-  if (ticketError) return { success: false, error: ticketError.message }
+  if (ticketError) {
+    console.error("DATABASE ERROR:", ticketError.message);
+    return { success: false, error: ticketError.message };
+  }
 
-
-  await supabase.from("notifications").insert([{
-    user_id: user.id,
-    ticket_id: ticketData.id,
-    title: "Ticket Sent",
-    message: `Ticket ${ticketNo} successfully created.`,
-    is_read: false
-  }]);
-
-  revalidatePath("/dashboard")
-  return { success: true }
+  revalidatePath("/dashboard");
+  return { success: true };
 }
