@@ -7,6 +7,7 @@ interface UserAvatarProps {
   src?: string | null
   fallback: string
   unoptimized?: boolean;
+  className?: string;
 }
 
 export default function UserAvatar({ src, fallback, unoptimized = false }: UserAvatarProps) {

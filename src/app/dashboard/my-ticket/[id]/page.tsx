@@ -170,17 +170,12 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                 </div>
               )}
             </div>
-          </Card>
-
-          <Card className="rounded-2xl border-slate-200 shadow-sm bg-white overflow-hidden">
-            <div className="p-1">
+          </Card>       
               <TicketComments
                 ticketId={Number(ticket.id)}
                 initialComments={initialComments}
                 currentUserId={user.id}
               />
-            </div>
-          </Card>
         </div>
 
         <div className="lg:col-span-4 space-y-5">

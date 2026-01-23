@@ -121,9 +121,9 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <div className="lg:col-span-8 space-y-5">
           <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-5 space-y-4">
-              <div className="flex items-center gap-2 font-bold text-slate-800 text-sm">
-                <FileText className="h-4 w-4 text-primary" />
+            <div className="p-8 space-y-7">
+              <div className="flex items-center gap-2 font-bold text-slate-800 text-sm ">
+                <FileText className="h-6 w-6 text-primary " />
                 Ticket Description
               </div>
               <div className="text-slate-600 leading-relaxed whitespace-pre-wrap text-sm border-l-4 border-primary/20 pl-5">
@@ -155,31 +155,26 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
               )}
             </div>
           </Card>
-
-          <Card className="rounded-2xl border-slate-200 shadow-sm">
-            <div className="p-1">
               <TicketComments 
                 ticketId={Number(ticket.id)} 
                 initialComments={initialComments} 
                 currentUserId={user.id} 
               />
-            </div>
-          </Card>
         </div>
 
         <div className="lg:col-span-4 space-y-5">
-          <Card className="p-5 rounded-2xl border-slate-200 shadow-sm bg-white">
-            <h3 className="font-bold text-slate-800 mb-4 text-[13px] uppercase tracking-widest flex items-center gap-2">
-              <Clock className="h-3.5 w-3.5 text-primary" />
+          <Card className="p-6 rounded-2xl border-slate-200 shadow-sm bg-white">
+            <h3 className="p-1 font-bold text-foreground text-[15px] uppercase tracking-widest flex items-center gap-2">
+              <Clock className="h-4 w-4 text-primary" />
               Activity Log
             </h3>
             {!(["CLOSED", "CANCELED"].includes(ticket.status)) && ticket.sla_deadline ? (
-              <div className="mb-6">
+              <div className="mb-2 p-1">
                 <SLACountdown deadline={ticket.sla_deadline} />
               </div>
             ) : ticket.status === "CANCELED" && (
               <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-dashed border-slate-200 flex items-center gap-3">
-                <XCircle className="h-4 w-4 text-slate-400" />
+                <XCircle className="h-5 w-5 text-slate-400" />
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">SLA Monitoring Stopped</span>
               </div>
             )}
@@ -187,7 +182,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
             <div className="relative pl-6 space-y-5 before:absolute before:inset-0 before:left-[7px] before:h-full before:w-[1.5px] before:bg-slate-100">
               {logs.length > 0 ? logs.slice(0, 5).map((log: TicketLog, index: number) => (
                 <div key={log.id} className="relative">
-                  <div className={`absolute -left-[22px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-white ${
+                  <div className={`absolute -left-[21px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-white ${
                     index === 0 ? "bg-primary" : "bg-slate-300"
                   }`} />
                   <p className={`text-[13px] leading-tight ${index === 0 ? "font-bold text-slate-900" : "font-medium text-slate-500"}`}>
@@ -199,12 +194,12 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                 </div>
               )) : (
                 <div className="relative">
-                  <div className="absolute -left-[23px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-primary" />
-                  <p className="text-[13px] font-bold text-slate-900">No activity logged</p>
+                  <div className="absolute -left-[21px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-primary" />
+                  <p className="text-[13px] font-bold text-foreground">No activity logged</p>
                 </div>
               )}
               <div className="relative">
-                <div className="absolute -left-[23px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-slate-300" />
+                <div className="absolute -left-[21px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-slate-300" />
                 <p className="text-[13px] font-medium text-slate-500">Ticket Created</p>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[11px] font-medium text-slate-400">
