@@ -32,7 +32,7 @@ export function SLACountdown({ deadline }: { deadline: string }) {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [deadline]);
+    }, [deadline]);
 
   if (timeLeft.isOverdue) {
     return (
@@ -51,9 +51,9 @@ export function SLACountdown({ deadline }: { deadline: string }) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-slate-100 rounded-lg">
-            <Timer className="h-4 w-4 text-slate-600" />
+            <Timer className="h-3 w-3 text-slate-600" />
           </div>
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
             Resolution Target
           </span>
         </div>
@@ -64,7 +64,7 @@ export function SLACountdown({ deadline }: { deadline: string }) {
       </div>
 
       <div className="flex items-baseline gap-1">
-        <span className="text-2xl font-mono font-bold text-slate-800 tracking-tight">
+        <span className="text-[15px] font-mono font-bold text-slate-800 tracking-tight">
           {timeLeft.hours}:{timeLeft.minutes}:{timeLeft.seconds}
         </span>
         <span className="text-[10px] font-bold text-slate-400 uppercase ml-1">Remaining</span>
