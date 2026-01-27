@@ -29,6 +29,7 @@ interface Comment {
   message: string
   user_id: string
   created_at: string
+  is_read: boolean // Tambahkan kolom ini
   profiles: Profile | null 
 }
 
@@ -43,51 +44,83 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
   const [newMessage, setNewMessage] = useState<string>("")
   const [isSending, setIsSending] = useState<boolean>(false)
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [unreadCount, setUnreadCount] = useState<number>(0)
 
   const scrollRef = useRef<HTMLDivElement>(null) 
   const supabase = createClient()
 
-  useEffect(() => {
-    const lastRead = localStorage.getItem(`ticket_last_read_${ticketId}`)
-    if (!lastRead) {
-      setUnreadCount(initialComments.length)
-    } else {
-      const newOnes = initialComments.filter(c => new Date(c.created_at) > new Date(lastRead))
-      setUnreadCount(newOnes.length)
-    }
-  }, [ticketId, initialComments])
+  // 1. Hitung unreadCount berdasarkan state comments
+  // Kita hanya menghitung pesan dari orang lain yang is_read-nya masih false
+  const unreadCount = comments.filter(c => !c.is_read && c.user_id !== currentUserId).length
 
-  useEffect(() => {
-    if (isOpen) {
-      setUnreadCount(0)
-      localStorage.setItem(`ticket_last_read_${ticketId}`, new Date().toISOString())
-    }
-  }, [isOpen, ticketId])
+  // 2. Fungsi untuk menandai pesan sebagai terbaca di Database
+  const markAsRead = async () => {
+    try {
+      const { error } = await supabase
+        .from("ticket_comments")
+        .update({ is_read: true })
+        .eq("ticket_id", ticketId)
+        .eq("is_read", false)
+        .neq("user_id", currentUserId); // Jangan tandai pesan kita sendiri
 
+      if (!error) {
+        // Update state lokal agar badge langsung hilang
+        setComments(prev => prev.map(c => 
+          c.user_id !== currentUserId ? { ...c, is_read: true } : c
+        ));
+      }
+    } catch (err) {
+      console.error("Error updating read status:", err);
+    }
+  }
+
+  // 3. Trigger markAsRead saat popover dibuka
+  useEffect(() => {
+    if (isOpen && unreadCount > 0) {
+      markAsRead();
+    }
+  }, [isOpen]);
+
+  // 4. Realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel(`ticket-chat-${ticketId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_comments', filter: `ticket_id=eq.${ticketId}` },
-        async (payload) => {
-          const { data: profileData } = await supabase.from("profiles").select("full_name, avatar_url, role").eq("id", payload.new.user_id).single();
-          const newComment: Comment = {
-            id: payload.new.id as string,
-            message: payload.new.message as string,
-            user_id: payload.new.user_id as string,
-            created_at: payload.new.created_at as string,
-            profiles: profileData || { full_name: "User", avatar_url: null, role: "USER" }
-          };
-          setComments((prev) => prev.find(c => c.id === newComment.id) ? prev : [...prev, newComment]);
-          if (!isOpen) {
-            setUnreadCount((prev) => prev + 1)
-          } else {
-            localStorage.setItem(`ticket_last_read_${ticketId}`, new Date().toISOString())
-          }
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'ticket_comments', 
+        filter: `ticket_id=eq.${ticketId}` 
+      },
+      async (payload) => {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("full_name, avatar_url, role")
+          .eq("id", payload.new.user_id)
+          .single();
+
+        const newComment: Comment = {
+          id: payload.new.id as string,
+          message: payload.new.message as string,
+          user_id: payload.new.user_id as string,
+          created_at: payload.new.created_at as string,
+          is_read: payload.new.is_read as boolean,
+          profiles: profileData || { full_name: "User", avatar_url: null, role: "USER" }
+        };
+
+        setComments((prev) => {
+          const exists = prev.find(c => c.id === newComment.id);
+          if (exists) return prev;
+          return [...prev, newComment];
+        });
+
+        // Jika popover sedang terbuka dan pesan dari orang lain, langsung tandai terbaca
+        if (isOpen && payload.new.user_id !== currentUserId) {
+          markAsRead();
         }
-      ).subscribe();
+      }
+    ).subscribe();
+
     return () => { supabase.removeChannel(channel) };
-  }, [ticketId, supabase, isOpen]);
+  }, [ticketId, supabase, isOpen, currentUserId]);
 
   useEffect(() => {
     if (isOpen && scrollRef.current) {
@@ -103,7 +136,15 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
     if (!newMessage.trim() || isSending) return;
     setIsSending(true);
     try {
-      const { error } = await supabase.from("ticket_comments").insert([{ ticket_id: ticketId, user_id: currentUserId, message: newMessage.trim() }]);
+      const { error } = await supabase
+        .from("ticket_comments")
+        .insert([{ 
+          ticket_id: ticketId, 
+          user_id: currentUserId, 
+          message: newMessage.trim(),
+          is_read: false // Default false saat dikirim
+        }]);
+      
       if (error) throw error;
       setNewMessage("");
     } catch (err: unknown) {
@@ -132,10 +173,9 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
           side="top" 
           align="end" 
           sideOffset={12}
-
           className="w-[calc(100vw-32px)] sm:w-[400px] p-0 rounded-xl border border-slate-200 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.3)] overflow-hidden bg-white flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300"
         >
-          <div className="px-5 py-4 bg-primary text-white flex items-center justify-between shrink-0">
+          <div className="px-5 py-4 bg-[#007a33] text-white flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
               <Layout className="h-4 w-4" />
               <h3 className="font-semibold text-xs uppercase tracking-[0.15em]">Ticket Discussion</h3>
@@ -150,6 +190,7 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
               <ChevronDown className="h-5 w-5 hidden sm:block" />
             </Button>
           </div>
+          
           <div 
             ref={scrollRef}
             className="h-[60vh] sm:h-[450px] overflow-y-auto p-5 space-y-6 bg-white custom-scrollbar"
@@ -179,7 +220,6 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
             })}
           </div>
 
-          {/* Input Area */}
           <div className="p-4 bg-slate-50 border-t border-slate-100 shrink-0">
             <form onSubmit={handleSubmit} className="flex gap-2">
               <input 
