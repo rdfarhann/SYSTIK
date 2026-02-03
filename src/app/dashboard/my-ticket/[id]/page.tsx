@@ -20,8 +20,6 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import TicketComments from "@/components/tickets/ticket-comments"
 import { FormattedDate } from "@/components/ui/formatted-date"
-
-// IMPORT KOMPONEN SLA
 import { SLAStatusBadge } from "@/components/tickets/sla-status-badge"
 import { SLACountdown } from "@/components/tickets/sla-countdown"
 
@@ -86,12 +84,11 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
   return (
     <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <Link href="/dashboard/my-ticket" className="flex items-center gap-1 text-slate-500 hover:text-primary transition-colors group">
+        <Link href="/dashboard" className="flex items-center gap-1 text-slate-500 hover:text-primary transition-colors group">
           <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
           <span className="text-xs font-bold uppercase tracking-wider">Back</span>
         </Link>
         <div className="flex items-center gap-2">
-          {/* BADGE SLA DI HEADER */}
           {ticket.sla_deadline && (
             <SLAStatusBadge 
               deadline={ticket.sla_deadline} 
@@ -183,9 +180,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
             <h3 className="font-bold text-slate-800 mb-4 text-[13px] uppercase tracking-widest flex items-center gap-2">
               <Clock className="h-3.5 w-3.5 text-primary" />
               Activity Log
-            </h3>
-
-            {/* COUNTDOWN SLA DI SIDEBAR */}
+            </h3> 
             {!(["CLOSED", "CANCELED"].includes(ticket.status)) && ticket.sla_deadline ? (
               <div className="mb-6">
                 <SLACountdown deadline={ticket.sla_deadline} />

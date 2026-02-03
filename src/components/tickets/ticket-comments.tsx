@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { 
@@ -29,6 +29,7 @@ interface Comment {
   message: string
   user_id: string
   created_at: string
+  is_read: boolean
   profiles: Profile | null 
 }
 
@@ -47,47 +48,71 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
 
   const scrollRef = useRef<HTMLDivElement>(null) 
   const supabase = createClient()
+  const markAsRead = useCallback(async () => {
+    const { error } = await supabase
+      .from("ticket_comments")
+      .update({ is_read: true })
+      .eq("ticket_id", ticketId)
+      .eq("is_read", false)
+      .neq("user_id", currentUserId) 
+
+    if (!error) {
+      setUnreadCount(0)
+    }
+  }, [ticketId, currentUserId, supabase])
 
   useEffect(() => {
-    const lastRead = localStorage.getItem(`ticket_last_read_${ticketId}`)
-    if (!lastRead) {
-      setUnreadCount(initialComments.length)
-    } else {
-      const newOnes = initialComments.filter(c => new Date(c.created_at) > new Date(lastRead))
-      setUnreadCount(newOnes.length)
-    }
-  }, [ticketId, initialComments])
+    const unread = initialComments.filter(
+      c => !c.is_read && c.user_id !== currentUserId
+    ).length
+    setUnreadCount(unread)
+  }, [initialComments, currentUserId])
 
   useEffect(() => {
     if (isOpen) {
-      setUnreadCount(0)
-      localStorage.setItem(`ticket_last_read_${ticketId}`, new Date().toISOString())
+      markAsRead()
     }
-  }, [isOpen, ticketId])
+  }, [isOpen, markAsRead])
 
   useEffect(() => {
     const channel = supabase
       .channel(`ticket-chat-${ticketId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_comments', filter: `ticket_id=eq.${ticketId}` },
-        async (payload) => {
-          const { data: profileData } = await supabase.from("profiles").select("full_name, avatar_url, role").eq("id", payload.new.user_id).single();
-          const newComment: Comment = {
-            id: payload.new.id as string,
-            message: payload.new.message as string,
-            user_id: payload.new.user_id as string,
-            created_at: payload.new.created_at as string,
-            profiles: profileData || { full_name: "User", avatar_url: null, role: "USER" }
-          };
-          setComments((prev) => prev.find(c => c.id === newComment.id) ? prev : [...prev, newComment]);
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'ticket_comments', 
+        filter: `ticket_id=eq.${ticketId}` 
+      },
+      async (payload) => {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("full_name, avatar_url, role")
+          .eq("id", payload.new.user_id)
+          .single();
+
+        const newComment: Comment = {
+          id: payload.new.id,
+          message: payload.new.message,
+          user_id: payload.new.user_id,
+          created_at: payload.new.created_at,
+          is_read: payload.new.is_read as boolean || false,
+          profiles: profileData || { full_name: "User", avatar_url: null, role: "USER" }
+        };
+
+        setComments((prev) => prev.find(c => c.id === newComment.id) ? prev : [...prev, newComment]);
+
+        if (payload.new.user_id !== currentUserId) {
           if (!isOpen) {
             setUnreadCount((prev) => prev + 1)
           } else {
-            localStorage.setItem(`ticket_last_read_${ticketId}`, new Date().toISOString())
+            markAsRead()
           }
         }
-      ).subscribe();
+      }
+    ).subscribe();
+    
     return () => { supabase.removeChannel(channel) };
-  }, [ticketId, supabase, isOpen]);
+  }, [ticketId, supabase, isOpen, currentUserId, markAsRead]);
 
   useEffect(() => {
     if (isOpen && scrollRef.current) {
@@ -103,11 +128,18 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
     if (!newMessage.trim() || isSending) return;
     setIsSending(true);
     try {
-      const { error } = await supabase.from("ticket_comments").insert([{ ticket_id: ticketId, user_id: currentUserId, message: newMessage.trim() }]);
+      const { error } = await supabase
+        .from("ticket_comments")
+        .insert([{ 
+          ticket_id: ticketId, 
+          user_id: currentUserId, 
+          message: newMessage.trim(),
+          is_read: false 
+        }]);
       if (error) throw error;
       setNewMessage("");
-    } catch (err: unknown) {
-      console.error(err instanceof Error ? err.message : "Error");
+    } catch (err) {
+      console.error(err);
     } finally { setIsSending(false); }
   };
 
@@ -169,7 +201,7 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
                   </div>
                   <div className={`px-4 py-3 rounded-lg text-[13px] leading-relaxed shadow-sm max-w-[85%] border ${
                     isMe 
-                      ? 'bg-[#007a33] border-[#007a33] text-white self-end rounded-tr-none shadow-md' 
+                      ? 'bg-primary border-[#007a33] text-white self-end rounded-tr-none shadow-md' 
                       : 'bg-white border-slate-100 text-slate-700 self-start rounded-tl-none'
                   }`}>
                     {comment.message}
@@ -179,7 +211,6 @@ export default function TicketComments({ ticketId, initialComments, currentUserI
             })}
           </div>
 
-          {/* Input Area */}
           <div className="p-4 bg-slate-50 border-t border-slate-100 shrink-0">
             <form onSubmit={handleSubmit} className="flex gap-2">
               <input 

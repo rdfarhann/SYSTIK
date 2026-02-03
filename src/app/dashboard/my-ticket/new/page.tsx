@@ -61,9 +61,8 @@ export default function NewTicketPage() {
       return
     }
 
-    // --- 1. LOGIKA PERHITUNGAN SLA ---
     const now = new Date();
-    let slaHours = 12; // Default
+    let slaHours = 12; 
     if (priority === "URGENT") slaHours = 2;
     else if (priority === "HIGH") slaHours = 4;
     else if (priority === "MEDIUM") slaHours = 12;
@@ -105,9 +104,8 @@ export default function NewTicketPage() {
       user_id: userData.id,
       attachment_url: attachmentUrl,
       created_at: now.toISOString(),
-      // --- TAMBAHKAN DUA BARIS INI ---
       sla_deadline: slaDeadline.toISOString(),
-      sla_status: "PENDING" // Pakai PENDING sesuai constraint DB Anda
+      sla_status: "PENDING" 
     }
 
     const { error } = await supabase.from("tickets").insert([ticketData])
@@ -116,7 +114,6 @@ export default function NewTicketPage() {
       toast.error("Gagal mengirim tiket: " + error.message)
       setLoading(false)
     } else {
-      // Tambahkan notifikasi manual jika tidak pakai Server Action
       await supabase.from("notifications").insert([{
         user_id: userData.id,
         title: "Ticket Sent",
